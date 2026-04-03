@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Crew Screen - Sovereign Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#c1ecd4",
+              "surface-bright": "#f9f9f8",
+              "on-tertiary-fixed-variant": "#005235",
+              "secondary-container": "#aeeecb",
+              "secondary-fixed-dim": "#95d4b3",
+              "surface-container-highest": "#e1e3e2",
+              "outline": "#717973",
+              "on-secondary-container": "#316e52",
+              "on-primary-fixed": "#002114",
+              "tertiary": "#002d1b",
+              "tertiary-container": "#00452c",
+              "on-error-container": "#93000a",
+              "surface": "#f9f9f8",
+              "surface-dim": "#d9dad9",
+              "secondary-fixed": "#b1f0ce",
+              "inverse-primary": "#a5d0b9",
+              "inverse-surface": "#2e3131",
+              "surface-container": "#edeeed",
+              "on-background": "#191c1c",
+              "primary": "#012d1d",
+              "primary-fixed-dim": "#a5d0b9",
+              "on-tertiary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-surface": "#191c1c",
+              "on-tertiary-fixed": "#002113",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "outline-variant": "#c1c8c2",
+              "primary-container": "#1b4332",
+              "tertiary-fixed": "#92f7c3",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed-variant": "#0e5138",
+              "on-secondary": "#ffffff",
+              "inverse-on-surface": "#f0f1f0",
+              "on-primary-container": "#86af99",
+              "on-secondary-fixed": "#002114",
+              "secondary": "#2c694e",
+              "on-primary-fixed-variant": "#274e3d",
+              "error": "#ba1a1a",
+              "on-surface-variant": "#414844",
+              "surface-container-low": "#f3f4f3",
+              "tertiary-fixed-dim": "#75daa8",
+              "background": "#f9f9f8",
+              "surface-tint": "#3f6653",
+              "surface-container-high": "#e7e8e7",
+              "surface-variant": "#e1e3e2",
+              "on-tertiary-container": "#53b889"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f9f9f8;
+      }
+      .glass-settle {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-6 h-16 w-full bg-[#f9f9f8] dark:bg-stone-950">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#012d1d] dark:text-[#c1ecd4]" data-icon="account_balance_wallet">account_balance_wallet</span>
+<h1 class="font-['Manrope'] font-bold text-lg tracking-tight text-[#012d1d] dark:text-[#c1ecd4]">Sovereign Ledger</h1>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#e1e3e2] dark:hover:bg-stone-800 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#414844] dark:text-stone-500" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="max-w-2xl mx-auto px-6 pt-8">
+<!-- Header Section with Split Toggle -->
+<section class="mb-10">
+<div class="flex items-end justify-between mb-8 gap-8">
+<div>
+<span class="text-on-surface-variant font-label text-sm uppercase tracking-widest font-semibold mb-1 block">Total Group Bill</span>
+<h2 class="font-headline text-5xl font-extrabold text-primary tracking-tighter">₹4,280</h2>
+</div>
+<button class="bg-primary text-on-primary px-5 py-3 rounded-full flex items-center gap-2 font-headline font-bold text-sm shadow-xl shadow-primary/10 active:scale-95 transition-transform py-2.5 text-xs shadow-md shadow-primary/5 border border-primary/20">
+<span class="material-symbols-outlined text-sm" data-icon="person_add">person_add</span>
+                    Add Friend
+                </button>
+</div>
+<!-- Custom Segmented Control (Toggle) -->
+<div class="bg-surface-container-low p-1.5 rounded-full flex gap-1 items-center">
+<button class="flex-1 bg-surface-container-lowest text-primary py-3 rounded-full font-headline font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="drag_handle" style="font-variation-settings: 'FILL' 1;">drag_handle</span>
+                    Equal
+                </button>
+<button class="flex-1 text-on-surface-variant hover:text-primary py-3 rounded-full font-headline font-semibold text-sm transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="unfold_more">unfold_more</span>
+                    Unequal
+                </button>
+</div>
+</section>
+<!-- Frequent Friends Grid -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline text-xl font-bold text-on-surface">Frequent Friends</h3>
+<span class="text-on-surface-variant text-sm font-medium">4 Selected</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Friend Card 1 (Active) -->
+<div class="relative bg-surface-container-lowest p-5 rounded-[2rem] flex items-center gap-4 group transition-all hover:shadow-lg hover:shadow-primary/5">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary-fixed rounded-r-full"></div>
+<img alt="Arjun" class="w-14 h-14 rounded-full object-cover grayscale-[30%]" data-alt="Close-up portrait of a young man with a short beard smiling subtly, warm studio lighting, modern minimalist style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbrkxOkxLIetyLIgvvOEMhsnt620-4OQRBduByUq1gHSGjQjn0xhKNEAml5nCjFmtmVxjubQdJdCrrTkvOnpZVMBQwiyomZGNqakVuaxVcAKLoVVSwPY-7gvsRnj3hLJoONuMjQRzbZYOW4JSR-HhGxOOB31PqYCkceUJBuEgx03pfqeQ35mfbGm9gv42YMI14eYwB3EdCUORv1fAkASixs_r1_peWAuSuTE8cRmQGfeED_Ohp91yDvSb9YhhUIrVHvgZC32gY-F1j"/>
+<div class="flex-1">
+<p class="font-headline font-bold text-on-surface">Arjun Mehta</p>
+<p class="text-on-surface-variant text-xs font-medium">@arjun_m</p>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-primary">₹1,070</p>
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant text-xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Friend Card 2 -->
+<div class="relative bg-surface-container-lowest p-5 rounded-[2rem] flex items-center gap-4 group transition-all hover:shadow-lg hover:shadow-primary/5">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary-fixed rounded-r-full"></div>
+<img alt="Priya" class="w-14 h-14 rounded-full object-cover grayscale-[30%]" data-alt="Professional headshot of a young woman with long dark hair against a soft neutral background, soft daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbNpmPjzqcHH2kesw1_HPVI0FjjU4kGFxaeMP9y1w455LEfERpTcx-lxO87ZgrSjGLrOm2jtOFEmG6_vS8Df5jm9jcsH-H6C4_7reMH4OtGrQXRqoD8xLVcWg28adx7PDbDuNuJwQX2tuapESyhUaKcQrGEOo17sXIAVied5OwDefIoNEnMyzPmId7o0WkRC5xUnJxM5b0-PzUE_w9b827nW9ZLc0udh61dL1GTFk8YKPpG64OWfSpTEiFPo_RTtF9mNV-GpB98-Tu"/>
+<div class="flex-1">
+<p class="font-headline font-bold text-on-surface">Priya Sharma</p>
+<p class="text-on-surface-variant text-xs font-medium">@priya_splits</p>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-primary">₹1,070</p>
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant text-xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Friend Card 3 -->
+<div class="relative bg-surface-container-lowest p-5 rounded-[2rem] flex items-center gap-4 group transition-all hover:shadow-lg hover:shadow-primary/5">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary-fixed rounded-r-full"></div>
+<img alt="Vikram" class="w-14 h-14 rounded-full object-cover grayscale-[30%]" data-alt="Man in his 30s with clean glasses smiling at camera, soft morning light in an urban cafe setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-gT77cJzekjiB_paV4FmurC5esbFvd2JwtT-94XkCv3qn1kNMctETpTDskAC3JI2ey-s_QBGGN809xV9EPOxjzGdBfmjPkyerexIbe6YG8MRPdQpVBKGWB9IP4sexn9DkYQ5InkPSJhs9aPwkGMPp-ou-jDjGYaQGnCie9oGFu39CUNFtGxNHO9fyM5W0aeoXfMT_kctUYmNHQIYAc-93LrRMX9A_gTnjz3rj8EmLwvpiRgrVT-rEnjo_e43OW0-HEB5ntSgRvijZ"/>
+<div class="flex-1">
+<p class="font-headline font-bold text-on-surface">Vikram Singh</p>
+<p class="text-on-surface-variant text-xs font-medium">@vik_ledger</p>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-primary">₹1,070</p>
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant text-xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Friend Card 4 -->
+<div class="relative bg-surface-container-lowest p-5 rounded-[2rem] flex items-center gap-4 group transition-all hover:shadow-lg hover:shadow-primary/5">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-primary-fixed rounded-r-full"></div>
+<img alt="Sanya" class="w-14 h-14 rounded-full object-cover grayscale-[30%]" data-alt="Young woman with curly hair looking directly at the camera, artistic lighting with soft shadows, moody green backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYZZYH8bzLWR8QUrXQL48ZfDG9WeKi4EIMYkuttlu596CLliMh9MGt2Yd26ATMMOTJj4pjPlN7ZRmkB1VUurm7N3lLs1BCnA6W_skkqnLA9uBgpVLPpgcalxmSnuUOOQ7aZ4fdOoFxzi29YaT3cu4mozhNOJr9Rs_OK8ENUpPCnarlf_S_iC7Fom8hCTdLrkqUbP1Y6NaqxfoIVrLiciQTXkIhRlBvIO7hFDcIAs55PyoMIdXIBd8XD6rUPHNFjB9SCncllKAU2mtO"/>
+<div class="flex-1">
+<p class="font-headline font-bold text-on-surface">Sanya Iyer</p>
+<p class="text-on-surface-variant text-xs font-medium">@sanya_i</p>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-primary">₹1,070</p>
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant text-xl" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Other Friends / Contacts -->
+<section class="pb-16">
+<h3 class="font-headline text-xl font-bold text-on-surface mb-6">Suggestions</h3>
+<div class="space-y-4">
+<div class="bg-surface-container-low p-4 rounded-full flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center font-bold text-on-secondary-container">RH</div>
+<div class="flex-1">
+<p class="font-body font-semibold text-on-surface">Rohan Handa</p>
+<p class="text-on-surface-variant text-xs font-medium">+91 98XXX XXX01</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<div class="bg-surface-container-low p-4 rounded-full flex items-center gap-4 opacity-70">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-primary">KK</div>
+<div class="flex-1">
+<p class="font-body font-semibold text-on-surface">Kabir Kapoor</p>
+<p class="text-on-surface-variant text-xs font-medium">+91 99XXX XXX54</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button & Settle Bar -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-lg px-6 z-40">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-5 rounded-[2rem] font-headline font-extrabold text-lg flex items-center justify-center gap-3 shadow-[0_12px_24px_-4px_rgba(0,33,20,0.2)] active:scale-95 transition-all">
+            Go to Settle
+            <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#ffffff]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-[2rem] shadow-[0_-12px_24px_-4px_rgba(0,33,20,0.06)]">
+<a class="flex flex-col items-center justify-center text-[#414844] dark:text-stone-400 px-6 py-2.5 hover:opacity-80 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dialpad">dialpad</span>
+<span class="font-['Inter'] font-medium text-[11px]">Amount</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#c1ecd4] dark:bg-[#012d1d] text-[#012d1d] dark:text-[#c1ecd4] rounded-2xl px-6 py-2.5 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Inter'] font-medium text-[11px]">Friends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#414844] dark:text-stone-400 px-6 py-2.5 hover:opacity-80 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="payments">payments</span>
+<span class="font-['Inter'] font-medium text-[11px]">Settle</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,682 @@
+package com.quicksettle.presentation.screens.crew
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.East
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.quicksettle.domain.model.Friend
+import com.quicksettle.domain.usecase.CalculateSplitUseCase
+import com.quicksettle.presentation.components.GradientButton
+import com.quicksettle.presentation.theme.ManropeBold
+import com.quicksettle.presentation.theme.ManropeExtraBold
+import com.quicksettle.presentation.theme.OnPrimary
+import com.quicksettle.presentation.theme.Primary
+import com.quicksettle.presentation.theme.PrimaryContainer
+import com.quicksettle.presentation.theme.PrimaryFixed
+
+/**
+ * Select Friends screen — Friends tab.
+ *
+ * Hosts the total-bill header, Equal/Unequal toggle,
+ * frequent-friends list with selection, suggestions section,
+ * and a glassmorphism "Go to Settle" CTA.
+ */
+@Composable
+fun CrewScreen(
+    onAddFriend: () -> Unit,
+    onNavigateToSettle: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: FriendsViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val calculateSplitUseCase = CalculateSplitUseCase()
+    val amounts = uiState.perPersonAmounts(calculateSplitUseCase)
+
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 96.dp), // room for glassmorphism bar
+        ) {
+            // ── Header ──────────────────────────────────────────────────────────
+            item {
+                CrewHeader(
+                    totalAmount = uiState.totalAmount,
+                    description = uiState.description,
+                    onAddFriend = onAddFriend,
+                )
+            }
+
+            // ── Split Mode Toggle ────────────────────────────────────────────────
+            item {
+                SplitModeToggle(
+                    splitMode = uiState.splitMode,
+                    onToggle = viewModel::toggleSplitMode,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                )
+            }
+
+            // ── Frequent Friends section ─────────────────────────────────────────
+            if (uiState.frequentFriends.isNotEmpty()) {
+                item {
+                    SectionHeader(
+                        title = "Frequent Friends",
+                        trailing = "${uiState.selectedFriends.size} Selected",
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                    )
+                }
+                items(
+                    items = uiState.frequentFriends,
+                    key = { it.id },
+                ) { friend ->
+                    val isSelected = uiState.selectedFriends.any { it.friend.id == friend.id }
+                    val friendAmount = if (isSelected) amounts[friend.id] ?: 0.0 else null
+                    FriendCard(
+                        friend = friend,
+                        isSelected = isSelected,
+                        amount = friendAmount,
+                        splitMode = uiState.splitMode,
+                        manualAmount = uiState.selectedFriends
+                            .find { it.friend.id == friend.id }?.manualAmount ?: 0.0,
+                        onManualAmountChange = { viewModel.setManualAmount(friend.id, it) },
+                        onClick = { viewModel.toggleFriend(friend.id) },
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                    )
+                }
+            }
+
+            // ── Suggestions section ──────────────────────────────────────────────
+            val suggestions = uiState.suggestions
+            if (suggestions.isNotEmpty()) {
+                item {
+                    SectionHeader(
+                        title = "Suggestions",
+                        trailing = null,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                    )
+                }
+                items(
+                    items = suggestions,
+                    key = { "suggestion_${it.id}" },
+                ) { friend ->
+                    SuggestionCard(
+                        friend = friend,
+                        onClick = { viewModel.toggleFriend(friend.id) },
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                    )
+                }
+            }
+
+            // Spacer at the bottom before the CTA bar
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+        }
+
+        // ── Glassmorphism "Go to Settle" CTA ────────────────────────────────────
+        GlassmorphismCtaBar(
+            enabled = uiState.canProceed,
+            onGoToSettle = onNavigateToSettle,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun CrewHeader(
+    totalAmount: Double,
+    description: String,
+    onAddFriend: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column {
+            Text(
+                text = "TOTAL GROUP BILL",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    letterSpacing = 2.sp,
+                    fontFamily = ManropeBold,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "₹${formatAmount(totalAmount)}",
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontFamily = ManropeExtraBold,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (description.isNotBlank()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        // Add Friend button — gradient bg, rounded-full, person_add icon
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(Primary, PrimaryContainer),
+                        start = Offset(0f, Float.POSITIVE_INFINITY),
+                        end = Offset(Float.POSITIVE_INFINITY, 0f),
+                    )
+                )
+                .clickable(onClick = onAddFriend)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.PersonAdd,
+                    contentDescription = "Add Friend",
+                    tint = OnPrimary,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    text = "Add Friend",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = OnPrimary,
+                )
+            }
+        }
+    }
+}
+
+// ── Split Mode Toggle ─────────────────────────────────────────────────────────
+
+@Composable
+private fun SplitModeToggle(
+    splitMode: SplitMode,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+        ) {
+            // Equal
+            ToggleOption(
+                label = "Equal",
+                icon = {
+                    Text(
+                        text = "=",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (splitMode == SplitMode.EQUAL)
+                            MaterialTheme.colorScheme.onSurface
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                selected = splitMode == SplitMode.EQUAL,
+                onClick = { if (splitMode != SplitMode.EQUAL) onToggle() },
+                modifier = Modifier.weight(1f),
+            )
+
+            // Unequal
+            ToggleOption(
+                label = "Unequal",
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.DragHandle,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = if (splitMode == SplitMode.UNEQUAL)
+                            MaterialTheme.colorScheme.onSurface
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                selected = splitMode == SplitMode.UNEQUAL,
+                onClick = { if (splitMode != SplitMode.UNEQUAL) onToggle() },
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToggleOption(
+    label: String,
+    icon: @Composable () -> Unit,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val bgColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.surfaceContainerLowest
+        else Color.Transparent,
+        animationSpec = tween(200),
+        label = "toggleBg",
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.onSurface
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(200),
+        label = "toggleText",
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(bgColor)
+            .then(
+                if (selected) Modifier.shadow(
+                    elevation = 2.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    ambientColor = Color(0x0F002114),
+                    spotColor = Color(0x0F002114),
+                ) else Modifier
+            )
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp, horizontal = 12.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            icon()
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontFamily = ManropeBold,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = textColor,
+            )
+        }
+    }
+}
+
+// ── Section Header ────────────────────────────────────────────────────────────
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    trailing: String?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontFamily = ManropeBold,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (trailing != null) {
+            Text(
+                text = trailing,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+// ── Friend Card ───────────────────────────────────────────────────────────────
+
+@Composable
+private fun FriendCard(
+    friend: Friend,
+    isSelected: Boolean,
+    amount: Double?,
+    splitMode: SplitMode,
+    manualAmount: Double,
+    onManualAmountChange: (Double) -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0x0F002114),
+                spotColor = Color(0x0F002114),
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .clickable(onClick = onClick),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 16.dp, top = 14.dp, bottom = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // 4dp primary_fixed left pill indicator
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(48.dp)
+                    .background(
+                        color = if (isSelected) PrimaryFixed else Color.Transparent,
+                        shape = RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp),
+                    ),
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Avatar placeholder
+            FriendAvatar(
+                name = friend.name,
+                modifier = Modifier.size(48.dp),
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Name + UPI handle
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = friend.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = ManropeBold,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (friend.upiId != null) {
+                    Text(
+                        text = "@${friend.upiId.substringBefore('@')}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Amount + selection indicator
+            Column(horizontalAlignment = Alignment.End) {
+                if (isSelected && amount != null) {
+                    Text(
+                        text = "₹${formatAmount(amount)}",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontFamily = ManropeBold,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                if (isSelected) {
+                    // Green checkmark
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(
+                                color = Color(0xFF2C694E),
+                                shape = CircleShape,
+                            ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = "Selected",
+                            tint = Color.White,
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
+                } else {
+                    // Empty circle indicator
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .border(
+                                width = 1.5.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = CircleShape,
+                            ),
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ── Suggestion Card ───────────────────────────────────────────────────────────
+
+@Composable
+private fun SuggestionCard(
+    friend: Friend,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0x0F002114),
+                spotColor = Color(0x0F002114),
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .clickable(onClick = onClick),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 16.dp, top = 14.dp, bottom = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // No selection pill — use transparent space to match padding
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            FriendAvatar(
+                name = friend.name,
+                modifier = Modifier.size(48.dp),
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = friend.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = ManropeBold,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                // Show masked phone hint or UPI
+                val hint = if (friend.upiId != null) {
+                    "@${friend.upiId.substringBefore('@')}"
+                } else {
+                    "Tap to add"
+                }
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // "+" add circle
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        color = PrimaryFixed,
+                        shape = CircleShape,
+                    ),
+            ) {
+                Text(
+                    text = "+",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = ManropeBold,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = Primary,
+                )
+            }
+        }
+    }
+}
+
+// ── Avatar placeholder ────────────────────────────────────────────────────────
+
+@Composable
+fun FriendAvatar(
+    name: String,
+    modifier: Modifier = Modifier,
+) {
+    val initial = name.firstOrNull()?.uppercaseChar() ?: '?'
+    // Derive a consistent hue-shifted color from name hashCode
+    val hue = (name.hashCode().and(0xFF) / 255f) * 360f
+    val bgColor = Color.hsl(hue = hue, saturation = 0.35f, lightness = 0.88f)
+    val textColor = Color.hsl(hue = hue, saturation = 0.55f, lightness = 0.25f)
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clip(CircleShape)
+            .background(bgColor),
+    ) {
+        Text(
+            text = initial.toString(),
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontFamily = ManropeBold,
+                fontWeight = FontWeight.Bold,
+            ),
+            color = textColor,
+        )
+    }
+}
+
+// ── Glassmorphism CTA Bar ─────────────────────────────────────────────────────
+
+@Composable
+private fun GlassmorphismCtaBar(
+    enabled: Boolean,
+    onGoToSettle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = Color(0xCCFFFFFF), // #ffffff at ~80% opacity
+            )
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+    ) {
+        GradientButton(
+            text = "Go to Settle",
+            icon = Icons.Filled.East,
+            enabled = enabled,
+            onClick = onGoToSettle,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+internal fun formatAmount(amount: Double): String {
+    val long = (amount * 100).toLong()
+    val intPart = long / 100
+    val fracPart = long % 100
+    val intStr = formatIndianGrouping(intPart)
+    return if (fracPart == 0L) intStr else "$intStr.${fracPart.toString().padStart(2, '0')}"
+}
+
+private fun formatIndianGrouping(number: Long): String {
+    if (number == 0L) return "0"
+    val str = number.toString()
+    if (str.length <= 3) return str
+    val lastThree = str.takeLast(3)
+    val remaining = str.dropLast(3)
+    val groups = mutableListOf<String>()
+    var i = remaining.length
+    while (i > 0) {
+        val start = maxOf(0, i - 2)
+        groups.add(0, remaining.substring(start, i))
+        i = start
+    }
+    return groups.joinToString(",") + "," + lastThree
+}

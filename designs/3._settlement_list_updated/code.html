@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#c1ecd4",
+              "surface-bright": "#f9f9f8",
+              "on-tertiary-fixed-variant": "#005235",
+              "secondary-container": "#aeeecb",
+              "secondary-fixed-dim": "#95d4b3",
+              "surface-container-highest": "#e1e3e2",
+              "outline": "#717973",
+              "on-secondary-container": "#316e52",
+              "on-primary-fixed": "#002114",
+              "tertiary": "#002d1b",
+              "tertiary-container": "#00452c",
+              "on-error-container": "#93000a",
+              "surface": "#f9f9f8",
+              "surface-dim": "#d9dad9",
+              "secondary-fixed": "#b1f0ce",
+              "inverse-primary": "#a5d0b9",
+              "inverse-surface": "#2e3131",
+              "surface-container": "#edeeed",
+              "on-background": "#191c1c",
+              "primary": "#012d1d",
+              "primary-fixed-dim": "#a5d0b9",
+              "on-tertiary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-surface": "#191c1c",
+              "on-tertiary-fixed": "#002113",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "outline-variant": "#c1c8c2",
+              "primary-container": "#1b4332",
+              "tertiary-fixed": "#92f7c3",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed-variant": "#0e5138",
+              "on-secondary": "#ffffff",
+              "inverse-on-surface": "#f0f1f0",
+              "on-primary-container": "#86af99",
+              "on-secondary-fixed": "#002114",
+              "secondary": "#2c694e",
+              "on-primary-fixed-variant": "#274e3d",
+              "error": "#ba1a1a",
+              "on-surface-variant": "#414844",
+              "surface-container-low": "#f3f4f3",
+              "tertiary-fixed-dim": "#75daa8",
+              "background": "#f9f9f8",
+              "surface-tint": "#3f6653",
+              "surface-container-high": "#e7e8e7",
+              "surface-variant": "#e1e3e2",
+              "on-tertiary-container": "#53b889"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f9f9f8;
+      }
+      .glass-blur {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .custom-shadow {
+        box-shadow: 0 12px 24px -4px rgba(0, 33, 20, 0.06);
+      }
+      .primary-gradient {
+        background: linear-gradient(45deg, #012d1d 0%, #1b4332 100%);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar from JSON -->
+<nav class="flex items-center justify-between px-6 h-16 w-full bg-[#f9f9f8] dark:bg-stone-950 fixed top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#012d1d] dark:text-[#c1ecd4]" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-['Manrope'] font-bold text-lg tracking-tight text-[#012d1d] dark:text-[#c1ecd4]">Sovereign Ledger</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-[#e1e3e2] transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#414844]" data-icon="history">history</span>
+</button>
+<button class="p-2 rounded-full hover:bg-[#e1e3e2] transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#414844]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</nav>
+<main class="mt-20 px-6 max-w-2xl mx-auto">
+<!-- Hero Summary Section -->
+<section class="mb-10 text-center">
+<span class="font-label text-sm uppercase tracking-widest text-on-surface-variant font-semibold">Total to Collect</span>
+<h1 class="font-headline text-5xl font-extrabold mt-2 text-primary tracking-tighter">
+                ₹12,450
+</h1>
+<div class="mt-4 flex justify-center">
+<div class="bg-primary-fixed px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-xs" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-on-primary-fixed-variant text-xs font-bold font-label">4 ACTIVE DEBTS</span>
+</div>
+</div>
+</section>
+<!-- Participants List (Asymmetric Layout / Bento-ish) -->
+<div class="space-y-6">
+<!-- Participant Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-[2rem] custom-shadow group transition-all duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full overflow-hidden bg-primary-fixed">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young professional man with a friendly smile, clean studio lighting, warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpWYsHKLRyo9dzyHsbj0Llf1ue6pCciP_L45uA11Btostz3V38BJ6ILdHxM65MzSQnY8_TdZnJ18wQu_RG1frl6e9Zr-EAy9NhPUvxjU93_h4T05ejdBnNq_tJw3lQNNjC7T-BHt3NQ9uaRU2nxh1xNVVgkJoY8QNAyyx9s2NyHjRJWy3ccZ-Q_7-D9l2XBvTFhIFYllzz6MsWS5MB4-b8HtfJNYRyFlXKAzo97jNbU5YPpZylcXoI0Xk4FVQuQiAGtIWRa3RxKdSB"/>
+</div>
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface">Arjun Mehta</h3>
+<p class="font-body text-sm text-on-surface-variant">Shared: Weekend Getaway</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline text-2xl font-bold text-primary">₹4,200</span>
+<div class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-tighter mt-1">Pending 3 days</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-surface-container-high text-primary font-bold font-label text-sm hover:bg-surface-variant transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="qr_code_2">qr_code_2</span>
+                        Show QR
+                    </button>
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#25D366]/10 text-[#075E54] font-bold font-label text-sm hover:bg-[#25D366]/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="share">share</span>
+                        WhatsApp
+                    </button>
+</div>
+</div>
+<!-- Participant Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-[2rem] custom-shadow group transition-all duration-300 border-l-4 border-primary-fixed">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full overflow-hidden bg-secondary-fixed">
+<img class="w-full h-full object-cover" data-alt="Close-up portrait of a woman with glasses, professional aesthetic, soft natural lighting, editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcydjj8ejgu83M1liNQIoUt6TBndMTWF7EP6CM85XWV-v8GtVb3K_a7Iz3ytMgbjp2pAfcPXpMb72sh9sSHLc-OEC7kynETJ2vYlgrMgaEwPmkyblzflWjzkWU5PArCHCZpXUmOzp0EbZyhBLGt2isQJvh7Gh86kxiW2E671gijRH2QO1UujCDTZrqnHIiqAkSrejQaYCaKkd5-3FHlgeoXAQGREfVK-PYrvzJMKPqGHNAzzW_BEuwOtxbCKDjF8vwL1yRtqnyYyNR"/>
+</div>
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface">Priya Sharma</h3>
+<p class="font-body text-sm text-on-surface-variant">Shared: Office Lunch</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline text-2xl font-bold text-primary">₹850</span>
+<div class="text-[10px] font-bold text-error uppercase tracking-tighter mt-1">Urgent</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-surface-container-high text-primary font-bold font-label text-sm hover:bg-surface-variant transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="qr_code_2">qr_code_2</span>
+                        Show QR
+                    </button>
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#25D366]/10 text-[#075E54] font-bold font-label text-sm hover:bg-[#25D366]/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="share">share</span>
+                        WhatsApp
+                    </button>
+</div>
+</div>
+<!-- Participant Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-[2rem] custom-shadow group transition-all duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full overflow-hidden bg-tertiary-fixed">
+<img class="w-full h-full object-cover" data-alt="Stylized portrait of a young man with beard, cinematic lighting, teal and orange color palette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0LCX6hRMvX4e53v6VmN1awPvS2djBrY7xFziuZ6VznvVGCsPSCfe5OKJO6JTS8qkeChkhESEvlZQL6Idsvs-Y0rmxQ8YQPjWA3qV1f-lJJ8TzuiIQxDzc6-ynqANpv3gpZGHbmK5wHsAdxjDAWbJ4foIrCgoJYxIgMI6npAstIBqN_BG9toHu-UWSN185_IZSE8dbpVhlRUs382jcMk1oclIdSjH93pd57EJTPIWcGWvYiiyPysFFLoAwt6BjvivIpFZbWFx70m_c"/>
+</div>
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface">Rohan Das</h3>
+<p class="font-body text-sm text-on-surface-variant">Shared: Concert Tickets</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline text-2xl font-bold text-primary">₹6,500</span>
+<div class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-tighter mt-1">Due today</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-surface-container-high text-primary font-bold font-label text-sm hover:bg-surface-variant transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="qr_code_2">qr_code_2</span>
+                        Show QR
+                    </button>
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#25D366]/10 text-[#075E54] font-bold font-label text-sm hover:bg-[#25D366]/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="share">share</span>
+                        WhatsApp
+                    </button>
+</div>
+</div>
+<!-- Participant Card 4 -->
+<div class="bg-surface-container-lowest p-6 rounded-[2rem] custom-shadow group transition-all duration-300">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-full overflow-hidden bg-primary-fixed-dim">
+<img class="w-full h-full object-cover" data-alt="Headshot of a smiling woman in creative attire, soft focus background of a modern office, bright lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEmDzak6S2pqCZygy-wWmI6_fWHvCVnv7rvYIbs2GmQ1XTRnuc2k33_2ITUHSeWlDGkb8dVmx1cTTOYcwS1Fk6MZv2vtdc5YY8iBqsE36NnXY0L1XwHqcyKGGQz8-c937c0QKVE9fwfxlox3UydeJn0mgoIqPF78asOp9vvMa29TdHUwG1lkeVUrgXk1umAQK332BBfRG9PgAKOzCv0xPX2p096xuMQj1-9FGIVxVFCtgnknoDpW3stmGbCN89AhgQ-7n1xZcfDmhm"/>
+</div>
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface">Sneha Kapur</h3>
+<p class="font-body text-sm text-on-surface-variant">Shared: Birthday Gift</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline text-2xl font-bold text-primary">₹900</span>
+<div class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-tighter mt-1">Pending</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-surface-container-high text-primary font-bold font-label text-sm hover:bg-surface-variant transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="qr_code_2">qr_code_2</span>
+                        Show QR
+                    </button>
+<button class="flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#25D366]/10 text-[#075E54] font-bold font-label text-sm hover:bg-[#25D366]/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="share">share</span>
+                        WhatsApp
+                    </button>
+</div>
+</div>
+</div>
+<!-- Decorative Anchor / Empty State Buffer -->
+<div class="h-12"></div>
+</main>
+<!-- Floating Settle All Action -->
+<div class="fixed bottom-28 left-0 w-full flex justify-center px-6 z-40 pointer-events-none">
+<button class="pointer-events-auto primary-gradient text-on-primary px-8 py-4 rounded-full flex items-center gap-3 custom-shadow active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="checklist_rtl">checklist_rtl</span>
+<span class="font-headline font-bold text-sm tracking-wide">SETTLE ALL BALANCES</span>
+</button>
+</div>
+<!-- BottomNavBar from JSON -->
+<footer class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#ffffff]/80 dark:bg-stone-900/80 backdrop-blur-xl z-50 rounded-t-[2rem] shadow-[0_-12px_24px_-4px_rgba(0,33,20,0.06)]">
+<div class="flex flex-col items-center justify-center text-[#414844] dark:text-stone-400 px-6 py-2.5 hover:opacity-80 transition-all">
+<span class="material-symbols-outlined mb-1" data-icon="dialpad">dialpad</span>
+<span class="font-['Inter'] font-medium text-[11px]">Amount</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#414844] dark:text-stone-400 px-6 py-2.5 hover:opacity-80 transition-all">
+<span class="material-symbols-outlined mb-1" data-icon="group">group</span>
+<span class="font-['Inter'] font-medium text-[11px]">Crew</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#c1ecd4] dark:bg-[#012d1d] text-[#012d1d] dark:text-[#c1ecd4] rounded-2xl px-6 py-2.5 transition-all scale-100">
+<span class="material-symbols-outlined mb-1" data-icon="payments" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-['Inter'] font-medium text-[11px]">Settle</span>
+</div>
+</footer>
+<!-- Trust Badge / Editorial Element -->
+<div class="fixed top-20 right-4 hidden lg:block w-48 bg-surface-container p-4 rounded-2xl">
+<div class="text-primary font-headline text-xs font-extrabold uppercase tracking-widest mb-2 border-b border-outline-variant/20 pb-2">Audit Trail</div>
+<div class="space-y-3">
+<div class="flex items-start gap-2">
+<div class="w-1 h-1 rounded-full bg-primary mt-1.5"></div>
+<p class="text-[10px] leading-tight text-on-surface-variant font-medium">Split "Weekend Getaway" finalized at 11:42 AM.</p>
+</div>
+<div class="flex items-start gap-2">
+<div class="w-1 h-1 rounded-full bg-primary mt-1.5"></div>
+<p class="text-[10px] leading-tight text-on-surface-variant font-medium">All calculations verified offline.</p>
+</div>
+</div>
+</div>
+</body></html>

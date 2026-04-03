@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sovereign Ledger | Add Friends</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#1B4332", // Forest Mint Ledger Core
+              "on-primary": "#ffffff",
+              "surface": "#f9f9f8",
+              "surface-container-low": "#f3f4f3",
+              "surface-container": "#edeeed",
+              "surface-container-high": "#e7e8e7",
+              "on-surface": "#191c1c",
+              "on-surface-variant": "#414844",
+              "outline-variant": "#c1c8c2",
+              "secondary-container": "#D1FAE5", // Light mint for active states
+              "on-secondary-container": "#064E3B",
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "1rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        background-color: #f9f9f8;
+        color: #191c1c;
+        font-family: 'Inter', sans-serif;
+      }
+      .headline-font { font-family: 'Manrope', sans-serif; }
+      .primary-gradient {
+        background: linear-gradient(135deg, #1B4332 0%, #2D5A47 100%);
+      }
+    </style>
+</head>
+<body class="min-h-screen pb-32">
+<!-- Sovereign Ledger Branded Header -->
+<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-surface-container-high flex justify-between items-center w-full px-6 py-4">
+<button class="p-2 text-primary hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</button>
+<h1 class="text-lg font-extrabold tracking-tight text-primary headline-font">Sovereign Ledger</h1>
+<div class="flex items-center gap-2">
+<button class="p-2 text-primary hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white"></span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-surface-container-high">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3eah2ZQ6r_I5aujQe4Ikfg9nQgbDEa2n4UQsAi2C11Wr21so4S18jQHk6oisgwpVQsP7jgrmmI3CYAmACQkDO7ggYnpdNqq94bXbjsILJdTrhpSP1mauaALYaL-fWFFt3t4TAiSruoVIxI6Mq1Rs13LlgcvTGbyAVbd3IvSu7xPh6j52ofDpWSBM1BV6P6eCmKJsXPId_IRlj2WWoI0QcG6OGwtkLQoUj5GnvpMiWc5XBOiTo3OzYWlwGU9PeVC2NMrA8EA9K6Wzp"/>
+</div>
+</div>
+</header>
+<main class="max-w-xl mx-auto px-6 pt-8 space-y-8">
+<!-- Search Section -->
+<section class="space-y-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">person_search</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all headline-font font-semibold text-on-surface placeholder:text-on-surface-variant/60" placeholder="Search contacts or enter name" type="text"/>
+</div>
+<button class="w-full flex items-center justify-center gap-3 py-4 primary-gradient text-on-primary rounded-2xl font-bold headline-font active:scale-[0.98] transition-all shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined">import_contacts</span>
+<span>Import from Contacts</span>
+</button>
+</section>
+<!-- Suggested Friends Section -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="headline-font text-lg font-extrabold text-on-surface tracking-tight">Suggested Friends</h2>
+<span class="text-[10px] font-bold font-label uppercase tracking-widest text-on-surface-variant bg-surface-container px-2 py-1 rounded">Frequent</span>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<!-- Suggestion 1 -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+<img alt="Arjun Mehta" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoVDKU1I0zf7PTPshf44MH6cJY2LdVRvpIAImueY1gLg9G0X3h8BlE_wGhY5HgFFgW6toUBgjMPv-xeKw6VTp2OrZFHgTfOP90-1D9ZS8wYVEHKV2FwNRBs20h6WuPaJM2cL6HT_ref7GDKSuEIYCpZ9oJLdoq1cP_diUKePhiZULy1Zc09xAYQseJcs5pXBN-b3nagVND9p0wzJRk5zjyleRZZlJq6-E4irt7YotPZOKt1Iy5d3W3h7MNIMCUMFYxk-EX7utKM8Ef"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-lg p-0.5 border-2 border-surface">
+<span class="material-symbols-outlined text-[14px] font-bold">add</span>
+</div>
+</div>
+<span class="text-[11px] font-bold text-center headline-font text-on-surface truncate w-full">Arjun Mehta</span>
+</div>
+<!-- Suggestion 2 -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+<img alt="Priya Sharma" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwORQax8biwKpcTAbDPbMw60I0cHLtotkeKtjihBqbabzrxv2EY2oJiadejWRmEr9LC32-l874IQZXzpnAWEq8CBruXif6X2isXVC_uuv6peaZmo2pWfDrgD3gxt_sYki3i6x6SDVmSX7ymbim5HXfD7iI9qxgwfz6CzI1rAb_eDcHv5a5NqattjhGwMv7orq4Nl0H3WR5fZ8G1SOJ2dXEWImWA98uzxCGYNWrlKPAEHH8vjNa-iYrrYmdMUDXxox_Tx7QzCDxxTYS"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-lg p-0.5 border-2 border-surface">
+<span class="material-symbols-outlined text-[14px] font-bold">add</span>
+</div>
+</div>
+<span class="text-[11px] font-bold text-center headline-font text-on-surface truncate w-full">Priya Sharma</span>
+</div>
+<!-- Suggestion 3 -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+<img alt="Rahul K" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxpQOZ0G5NZCGKvHpucP6Foi47lB31x3PZE2KSpp2QpMQK1-lysgw9xEHrd0LbRcuW51E2Ajz0DpIgZRp0RK5gtZNbH_87ehdv89PzP6yNbSKiimGeFrle4gURq4DnsjPk07zpFk--eOKOhPTfBygQuMdzQ3Ak6jt44J0yo6RnzV11NX7wX1S5a4_ff1mLhPhk04vHHdGIo0z3vfDDwtRTXgd03q3hQxtLQ1SiKDPncTgdTeg51l7wpkASjdIt7WFpHzFc_u_f-PvG"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-lg p-0.5 border-2 border-surface">
+<span class="material-symbols-outlined text-[14px] font-bold">add</span>
+</div>
+</div>
+<span class="text-[11px] font-bold text-center headline-font text-on-surface truncate w-full">Rahul K.</span>
+</div>
+<!-- Suggestion 4 -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
+<img alt="Ananya V" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD42udmMsh8AauVaMzZM7FmBVM9XRzGbcm2tVv0_ViVVPfOdsDFqNFKo0HHLHF-5dhXkD549WGiVWEZ90c9x9HonD75c39h4OdoNd7okfwOk3qTQeGxPRxrBRr02pqQ9_fOEsMkX3IBG5kXdY7_a1m5-immL1Sj_8OAroyQU9HorPH4Z15TC5ebQQrGo2Y3wYa9W12iYW5yuOljM3ybNAZHmDuHX8mI60_0kLMmx4tzTKhqHAABhvVtFAh89yR6pav3YhVOTV9FZk24"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-lg p-0.5 border-2 border-surface">
+<span class="material-symbols-outlined text-[14px] font-bold">add</span>
+</div>
+</div>
+<span class="text-[11px] font-bold text-center headline-font text-on-surface truncate w-full">Ananya V.</span>
+</div>
+</div>
+</section>
+<!-- Manual UPI Entry -->
+<section class="space-y-4">
+<h3 class="headline-font text-xs font-bold text-on-surface-variant uppercase tracking-widest">Manual UPI ID Entry</h3>
+<div class="bg-surface-container rounded-2xl p-4 flex items-center gap-4 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<span class="material-symbols-outlined text-primary">alternate_email</span>
+<input class="bg-transparent border-none p-0 focus:ring-0 w-full headline-font font-bold text-lg text-primary placeholder:text-outline-variant" placeholder="username@upi" type="text"/>
+</div>
+<p class="text-[10px] text-on-surface-variant/70 italic px-2">Verified UPI IDs allow direct settlement to bank accounts.</p>
+</section>
+</main>
+<!-- Floating Action Button -->
+<div class="fixed bottom-28 right-6">
+<button class="primary-gradient text-on-primary py-4 px-6 rounded-2xl shadow-xl shadow-primary/30 active:scale-95 transition-all flex items-center gap-3">
+<span class="font-bold headline-font">Add to Group</span>
+<span class="material-symbols-outlined">group_add</span>
+</button>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-3 bg-white/90 backdrop-blur-xl border-t border-surface-container-high rounded-t-[2rem]">
+<!-- Amount -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 px-6 py-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-bold font-label uppercase tracking-wider mt-1">Amount</span>
+</button>
+<!-- Friends (Active) -->
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-2xl px-6 py-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="text-[10px] font-bold font-label uppercase tracking-wider mt-1">Friends</span>
+</button>
+<!-- Settle -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 px-6 py-2 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="text-[10px] font-bold font-label uppercase tracking-wider mt-1">Settle</span>
+</button>
+</nav>
+</body></html>

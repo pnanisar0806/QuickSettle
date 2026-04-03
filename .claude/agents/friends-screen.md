@@ -28,10 +28,14 @@ Build TWO screens: the Select Friends tab and the Add Friend full-screen overlay
    - This button opens the Add Friend overlay
 
 2. **Split Mode Toggle**:
-   - Two options: "Equal" (with = icon) | "Unequal" (with sort icon)
+   - Three options: "Equal" (with = icon) | "Unequal" (with sort icon) | "Share" (with pie_chart icon)
    - Selected: surface_container_lowest white bg with ambient shadow, rounded-xl
    - Unselected: transparent, on_surface_variant text
    - Wrap in a surface_container_high or outline_variant/20 rounded container
+
+   **KNOWN BUG — TODO**: In Unequal mode, the per-friend amount fields are not editable. Ensure TextFields are enabled and properly wired to `setManualAmount()` with `KeyboardType.Decimal`.
+
+   **PLANNED — Share mode**: When "Share" is selected, each friend card shows a ratio stepper (integer, default 1) instead of an amount field. The total is split proportionally by ratio. E.g., ratios 2:1:1 on ₹1000 → ₹500:₹250:₹250.
 
 3. **Frequent Friends** section:
    - "Frequent Friends" headline in headlineMedium Manrope Bold
@@ -65,7 +69,7 @@ Build TWO screens: the Select Friends tab and the Add Friend full-screen overlay
 State:
   totalAmount: Double           // from shared state or nav
   description: String
-  splitMode: SplitMode          // EQUAL or UNEQUAL
+  splitMode: SplitMode          // EQUAL, UNEQUAL, or SHARE
   selectedFriends: List<SelectedFriend>
   frequentFriends: List<Friend> // from Room
   suggestions: List<Friend>     // frequent but not yet selected
@@ -85,6 +89,7 @@ Split logic:
 - User is ALWAYS included in the split (participants + 1)
 - EQUAL: total / (selected + 1), handle rounding with zero leftover paisa
 - UNEQUAL: editable per-friend amounts, show remaining
+- SHARE: each participant has a share ratio (int, default 1); total split proportionally by ratio sum
 
 ---
 

@@ -45,6 +45,12 @@ data class ParticipantSplit(
 - `unequalSplit(totalAmount: Double, fixedAmounts: Map<String, Double>): Double`
   - Returns remaining amount after subtracting fixed amounts
   - Throws IllegalArgumentException if fixed amounts exceed total
+- `shareSplit(totalAmount: Double, shares: Map<String, Int>): Map<String, Double>` **(PLANNED — TODO)**
+  - Divides totalAmount proportionally by share ratios
+  - Example: shareSplit(1000.0, {"A": 2, "B": 1, "C": 1}) → {"A": 500.00, "B": 250.00, "C": 250.00}
+  - INVARIANT: sum of all returned values == totalAmount (zero leftover paisa)
+  - Strategy: compute proportional amounts, round down to 2dp, distribute remaining paisa one per person from first
+  - Throws IllegalArgumentException if shares map is empty or any share <= 0
 
 ### GenerateUpiLinkUseCase
 - `generateUri(vpa: String, name: String, amount: Double, description: String): String`
@@ -62,6 +68,15 @@ Write tests in `src/test/java/com/quicksettle/domain/usecase/`:
 - **Paisa invariant property test**: generate 200 random (amount, people) pairs, assert sum == total for every one
 - Single person: returns full amount
 - Unequal: normal case, exceeds total throws, exactly equal, zero remaining
+
+### ShareSplitUseCaseTest (PLANNED — TODO)
+- Share split: 2:1:1 on ₹1000 → 500, 250, 250
+- Equal shares (1:1:1) should produce same result as equalSplit
+- Single person with any share ratio returns full amount
+- Odd amounts with uneven ratios: paisa invariant holds (sum == total)
+- **Paisa invariant property test**: generate 200 random (amount, shares) pairs, assert sum == total
+- Empty shares map throws IllegalArgumentException
+- Share value <= 0 throws IllegalArgumentException
 
 ### GenerateUpiLinkUseCaseTest
 - Valid URI structure and all query params present

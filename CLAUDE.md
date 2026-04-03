@@ -83,7 +83,7 @@ com.quicksettle/
 
 ## Screens (4 total — see docs/designs/ for reference screenshots)
 1. **Bill Entry** (Amount tab): Description field + large ₹ amount display + custom number pad + "Add Friends" CTA
-2. **Select Friends** (Friends tab): Total bill header + Equal/Unequal toggle + Frequent Friends list with avatars + Suggestions section + "Go to Settle" CTA
+2. **Select Friends** (Friends tab): Total bill header + Equal/Unequal/Share toggle + Frequent Friends list with avatars + Suggestions section + "Go to Settle" CTA
 3. **Settlement List** (Settle tab): "Total to Collect" header + active debts badge + settlement cards with Show QR / WhatsApp buttons + "Settle All Balances" CTA
 4. **Add Friend** (overlay/sheet from Friends tab): Search/name entry + Import from Contacts + Suggested Friends grid + Manual UPI ID entry + "Add to Group" CTA
 
@@ -121,3 +121,7 @@ Amount must be formatted to exactly 2 decimal places. Name and description must 
 ## Phase Workflow
 Build in phases using subagents. See .claude/agents/ for phase-specific agents.
 Current build order: scaffold → domain → data → entry-screen → crew-screen → settle-screen → polish
+
+## TODO / Known Issues
+1. **BUG — Screen 2 (Unequal split input)**: When "Unequal" split mode is selected on the Friends/Crew screen, the per-participant amount TextFields are not editable. Users cannot enter individual amounts. The TextField must be properly enabled with `KeyboardType.Decimal` and wired to the `setManualAmount()` action.
+2. **FEATURE — "Share" split mode**: Add a third split option (Equal | Unequal | Share). In Share mode, users enter integer share ratios (e.g., 2:1:1) instead of fixed amounts. The total is divided proportionally. Requires updates to: `SplitMode` enum, `CalculateSplitUseCase` (new `shareSplit` method), `ParticipantEntry` (new `shareRatio` field), split mode toggle UI (3 options), and unit tests.

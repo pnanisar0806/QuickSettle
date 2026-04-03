@@ -1,0 +1,1 @@
+- [Build Phase Checklist](project_phase_checklist.md) — Tracks phase 0-6 completion; Phase 5 (Settle) is NOT done, only a placeholder

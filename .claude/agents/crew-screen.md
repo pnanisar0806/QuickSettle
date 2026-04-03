@@ -16,7 +16,7 @@ Build Screen 2: The Crew Screen (add participants, choose split mode, calculate 
 State:
   totalAmount: Double              // from nav args
   description: String              // from nav args
-  splitMode: SplitMode             // EQUAL, UNEQUAL, or SHARE (enum)
+  splitMode: SplitMode             // EQUAL, UNEQUAL, or SHARE (enum) — SHARE is PLANNED TODO
   participants: List<ParticipantEntry>
   newParticipantName: String       // text field state
   frequentFriends: List<Friend>    // from FriendRepository Flow
@@ -52,17 +52,16 @@ Actions:
 - Navigate to Settle screen
 
 ## KNOWN BUGS — TODO
-1. **Unequal mode amount entry is broken**: When "Unequal" split mode is selected, the per-participant amount TextFields are not editable — users cannot enter individual amounts. Fix: ensure the TextField in unequal mode is properly wired to `setManualAmount()`, has `enabled = true`, uses a mutable text state per participant, and the keyboard type is set to `KeyboardType.Decimal`. Check that the participant list item correctly switches from a read-only Text to an editable TextField when splitMode == UNEQUAL.
+1. **Unequal mode amount entry is broken**: When "Unequal" split mode is selected, the per-participant amount TextFields are not editable — users cannot enter individual amounts. Fix: ensure the TextField in unequal mode is properly wired to `setManualAmount()`, has `enabled = true`, uses a mutable text state per participant, and the keyboard type is set to `KeyboardType.Decimal`.
 
 ## PLANNED FEATURE — TODO
-1. **"Share" split mode (like Splitwise)**: Add a third split option alongside Equal and Unequal called "Share". In Share mode, users enter share ratios (e.g., 2:1:1) instead of fixed amounts. The total is divided proportionally based on the ratios. Example: ₹1000 with shares 2:1:1 → ₹500, ₹250, ₹250. This requires:
+1. **"Share" split mode (like Splitwise)**: Add a third split option alongside Equal and Unequal. In Share mode, users enter share ratios (e.g., 2:1:1) instead of fixed amounts. The total is divided proportionally. Requires:
    - Adding `SHARE` to the `SplitMode` enum
-   - Adding a `shareRatio: Int?` field to `ParticipantEntry` (default 1)
-   - A new `shareSplit(totalAmount: Double, shares: Map<String, Int>): Map<String, Double>` method in `CalculateSplitUseCase`
-   - Updating the split mode toggle from 2 options to 3: "Equal" | "Unequal" | "Share"
+   - Adding `shareRatio: Int?` field to `ParticipantEntry` (default 1)
+   - Delegating to `CalculateSplitUseCase.shareSplit()` (also PLANNED TODO in domain-builder)
+   - Updating the split mode toggle from 2 options to 3: "Equal" | "Custom" | "Share"
    - In Share mode, each participant row shows a ratio input (integer stepper or text field) instead of an amount field
-   - The user's share ratio defaults to 1 and is shown in the "Your share" info row
-   - Unit tests for share split including paisa invariant
+   - The user's share ratio defaults to 1
 
 ## CrewScreen Composable
 

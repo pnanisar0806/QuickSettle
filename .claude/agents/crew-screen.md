@@ -52,7 +52,18 @@ Actions:
 - Navigate to Settle screen
 
 ## KNOWN BUGS — TODO
-1. **Unequal mode amount entry is broken**: When "Unequal" split mode is selected, the per-participant amount TextFields are not editable — users cannot enter individual amounts. Fix: ensure the TextField in unequal mode is properly wired to `setManualAmount()`, has `enabled = true`, uses a mutable text state per participant, and the keyboard type is set to `KeyboardType.Decimal`.
+~~1. **Unequal mode amount entry is broken** — FIXED: BasicTextField with KeyboardType.Decimal, wired to setManualAmount()~~
+
+## Unequal Mode — "You" Card (IMPLEMENTED)
+- **"You" card**: read-only card at top of friend list showing auto-calculated remainder (total − sum of friends' amounts)
+- **Over-budget**: if friends' amounts exceed total, card shows error text + `canProceed` is false
+- **No separate info bar** — the "You" card itself shows the remaining amount
+- `ownerAmount` in unequal = `totalAmount - friendsTotal`
+
+## Equal Mode — "Paid for Others" (IMPLEMENTED)
+- **Toggle**: "I'm part of this split" vs "I paid for others" below the split mode selector
+- When "Paid for others" is active, `includeSelfInSplit = false` → total split among friends only (not +1 for owner)
+- Owner share becomes ₹0, info bar shows "You pay ₹0 — splitting among friends only"
 
 ## PLANNED FEATURE — TODO
 1. **"Share" split mode (like Splitwise)**: Add a third split option alongside Equal and Unequal. In Share mode, users enter share ratios (e.g., 2:1:1) instead of fixed amounts. The total is divided proportionally. Requires:
@@ -86,8 +97,23 @@ Use `rememberLauncherForActivityResult(ActivityResultContracts.PickContact())`:
 - Add as participant (name only, no UPI ID needed here)
 - Do NOT request READ_CONTACTS permission
 
+## Unit Tests (REQUIRED)
+Write/update tests in `app/src/test/java/com/quicksettle/presentation/screens/crew/`. Use JUnit 5 + Google Truth.
+
+Existing test files to update if features change:
+- `FriendsUiStateTest.kt` — pure state extension functions (suggestions, perPersonAmounts, ownerAmount, canProceed, isUnequalOverBudget)
+- `FriendsViewModelTest.kt` — ViewModel actions (toggle, search, manual amounts) using `FakeFriendDao` + `kotlinx-coroutines-test`
+- `FormatAmountTest.kt` — Indian amount formatting
+
+### Rules
+- Run `./gradlew testDebugUnitTest` after writing tests — ALL must pass
+- If you add or change a feature, update/add tests to cover the change
+- Test pure state extension functions separately from ViewModel coroutine actions
+- For ViewModel tests, use the `FakeFriendDao` pattern (see existing tests)
+
 ## Verification
 - `./gradlew assembleDebug` — compiles
+- `./gradlew testDebugUnitTest` — all existing + new tests pass
 - Navigation: Entry → Crew works with correct amount/description
 - Adding/removing participants updates the split correctly
 - Toggling equal/unequal recalculates properly

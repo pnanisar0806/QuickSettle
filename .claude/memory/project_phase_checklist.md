@@ -41,7 +41,7 @@ type: project
 - [x] GradientButton component — primary gradient, xl rounded, disabled state
 - [x] Amount input rules — max 2dp, max 7 digits, no leading zeros, Indian grouping
 
-### Phase 4 — Friends Screen: MOSTLY COMPLETE (known issues)
+### Phase 4 — Friends Screen: COMPLETE
 - [x] CrewScreen — header (total bill + "Add Friend" button), friend cards with left pill, suggestions section
 - [x] Split mode toggle UI — 2 options (Equal | Unequal)
 - [x] FriendCard — avatar, name, UPI handle, amount, checkmark selection
@@ -49,8 +49,8 @@ type: project
 - [x] Glassmorphism "Go to Settle" CTA bar
 - [x] AddFriendScreen — top bar, search, import contacts (ACTION_PICK), suggested friends horizontal scroll, manual UPI entry, "Add to Group"
 - [x] FriendsViewModel — full state, toggleFriend, toggleSplitMode, setManualAmount, addFriend variants
-- [ ] FriendChip component — **placeholder (empty body)**
-- [ ] **BUG**: Unequal mode per-friend amount TextFields not editable
+- [x] FriendChip component — avatar initial circle, name label, selected state with primary_fixed bg
+- [x] Unequal mode — editable BasicTextField with KeyboardType.Decimal, wired to setManualAmount()
 
 ### Phase 5 — Settle Screen: NOT COMPLETE (placeholder only)
 - [ ] SettleScreen — **only shows centered "Settlement List" text**

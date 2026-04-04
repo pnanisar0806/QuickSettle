@@ -83,8 +83,20 @@ Amount input rules:
 ## NumberPad (presentation/components/)
 Make it reusable. Follow the Stitch design exactly for sizing and colors.
 
+## Unit Tests (REQUIRED)
+Write/update tests in `app/src/test/java/com/quicksettle/presentation/screens/entry/`. Use JUnit 5 + Google Truth.
+
+Existing test files to update if features change:
+- `EntryUiStateTest.kt` — `canProceed` and `formattedAmount` (Indian comma grouping, decimal handling)
+- `EntryViewModelTest.kt` — input rules (digit append, decimal, backspace, max digits, max decimals, leading zeros)
+
+### Rules
+- Run `./gradlew testDebugUnitTest` after writing tests — ALL must pass
+- If you add or change a feature, update/add tests to cover the change
+
 ## Verification
 - `./gradlew assembleDebug` — compiles
+- `./gradlew testDebugUnitTest` — all existing + new tests pass
 - App launches with bottom nav, Amount tab shows this screen
 - Number pad updates amount display correctly
 - Indian comma formatting works (1,24,000)

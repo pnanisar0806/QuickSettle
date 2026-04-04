@@ -74,4 +74,6 @@ Set up Scaffold with BottomNavigationBar and NavHost.
 - @AndroidEntryPoint on MainActivity with SovereignLedgerTheme
 
 ## Verification
-`./gradlew assembleDebug` must succeed. Do NOT implement any features.
+- `./gradlew assembleDebug` must succeed
+- `./gradlew testDebugUnitTest` must succeed (existing tests must not break)
+- Do NOT implement any features

@@ -69,9 +69,17 @@ Provides:
 - CalculateSplitUseCase
 - GenerateUpiLinkUseCase
 
+## Unit Tests (REQUIRED)
+If you add repository logic that is testable without Android context (e.g. mapping, validation), write tests.
+For Room DAO and EncryptedSharedPreferences, integration tests require instrumented testing — skip for now but note in comments.
+
+### Rules
+- Run `./gradlew testDebugUnitTest` — ALL existing tests must still pass
+- Never break existing tests when adding data layer code
+
 ## Verification
 - Add @HiltAndroidApp to Application class if not already present
 - Add @AndroidEntryPoint to MainActivity
 - Run `./gradlew assembleDebug` — must compile
-- Run `./gradlew testDebugUnitTest` — existing tests must still pass
+- Run `./gradlew testDebugUnitTest` — all existing + new tests must pass
 - Do NOT create any UI screens

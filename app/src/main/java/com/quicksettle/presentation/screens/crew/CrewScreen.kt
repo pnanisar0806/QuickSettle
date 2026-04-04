@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DragHandle
@@ -33,6 +35,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,16 +45,19 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quicksettle.domain.model.Friend
-import com.quicksettle.domain.usecase.CalculateSplitUseCase
 import com.quicksettle.presentation.components.GradientButton
+import com.quicksettle.presentation.util.AmountFormatter
 import com.quicksettle.presentation.theme.ManropeBold
 import com.quicksettle.presentation.theme.ManropeExtraBold
 import com.quicksettle.presentation.theme.OnPrimary
@@ -72,8 +80,7 @@ fun CrewScreen(
     viewModel: FriendsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val calculateSplitUseCase = CalculateSplitUseCase()
-    val amounts = uiState.perPersonAmounts(calculateSplitUseCase)
+    val (amounts, ownerAmt) = viewModel.currentSplit()
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
@@ -96,6 +103,53 @@ fun CrewScreen(
                     onToggle = viewModel::toggleSplitMode,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
                 )
+            }
+
+            // ── Equal mode: "Paid for others" toggle ────────────────────────────
+            if (uiState.splitMode == SplitMode.EQUAL) {
+                item {
+                    PaidForOthersToggle(
+                        includeSelf = uiState.includeSelfInSplit,
+                        onToggle = viewModel::toggleIncludeSelf,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                    )
+                }
+            }
+
+            // ── Unequal mode: "You" card (shows auto-calculated remainder) ─────
+            if (uiState.splitMode == SplitMode.UNEQUAL && uiState.selectedFriends.isNotEmpty()) {
+                item {
+                    OwnerCard(
+                        selfAmount = ownerAmt,
+                        isOverBudget = uiState.isUnequalOverBudget,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                    )
+                }
+            }
+
+            // ── Equal mode: "Your share" info ────────────────────────────────────
+            if (uiState.splitMode == SplitMode.EQUAL && uiState.selectedFriends.isNotEmpty()) {
+                item {
+                    val yourShare = ownerAmt
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = PrimaryFixed,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp, vertical = 4.dp)
+                            .fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = if (uiState.includeSelfInSplit) "Your share: ₹${formatAmount(yourShare)}"
+                            else "You pay ₹0 — splitting among friends only",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontFamily = ManropeBold,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = Primary,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        )
+                    }
+                }
             }
 
             // ── Frequent Friends section ─────────────────────────────────────────
@@ -351,6 +405,167 @@ private fun ToggleOption(
     }
 }
 
+// ── "Paid for Others" Toggle ─────────────────────────────────────────────────
+
+@Composable
+private fun PaidForOthersToggle(
+    includeSelf: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = if (!includeSelf) PrimaryFixed else MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = if (!includeSelf) Primary else MaterialTheme.colorScheme.outlineVariant,
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "I paid for others",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = ManropeBold,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = if (!includeSelf) Primary else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            // Toggle indicator
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(28.dp)
+                    .border(
+                        width = 2.dp,
+                        color = if (!includeSelf) Color(0xFF2C694E)
+                        else MaterialTheme.colorScheme.outlineVariant,
+                        shape = CircleShape,
+                    )
+                    .background(
+                        color = if (!includeSelf) Color(0xFF2C694E)
+                        else Color.Transparent,
+                        shape = CircleShape,
+                    ),
+            ) {
+                if (!includeSelf) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Paid for others",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ── Owner "You" Card (Unequal Mode — read-only, shows remainder) ────────────
+
+@Composable
+private fun OwnerCard(
+    selfAmount: Double,
+    isOverBudget: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val amountColor = if (isOverBudget) MaterialTheme.colorScheme.error
+    else MaterialTheme.colorScheme.onSurface
+    val subtitle = if (isOverBudget) "Friends' amounts exceed total" else "Your share"
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color(0x0F002114),
+                spotColor = Color(0x0F002114),
+            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 16.dp, top = 14.dp, bottom = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Left pill — always active for "You"
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(48.dp)
+                    .background(
+                        color = PrimaryFixed,
+                        shape = RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp),
+                    ),
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // "You" avatar
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(PrimaryFixed),
+            ) {
+                Text(
+                    text = "Y",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = ManropeBold,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = Primary,
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Name + subtitle
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "You",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontFamily = ManropeBold,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isOverBudget) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Read-only amount display
+            Text(
+                text = "₹${formatAmount(selfAmount)}",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = ManropeBold,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = amountColor,
+            )
+        }
+    }
+}
+
 // ── Section Header ────────────────────────────────────────────────────────────
 
 @Composable
@@ -463,7 +678,60 @@ private fun FriendCard(
 
             // Amount + selection indicator
             Column(horizontalAlignment = Alignment.End) {
-                if (isSelected && amount != null) {
+                if (isSelected && splitMode == SplitMode.UNEQUAL) {
+                    // Editable amount field for unequal mode
+                    var textValue by remember(friend.id) {
+                        mutableStateOf(
+                            if (manualAmount == 0.0) "" else manualAmount.toBigDecimal().stripTrailingZeros().toPlainString()
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "₹",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = ManropeBold,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        BasicTextField(
+                            value = textValue,
+                            onValueChange = { newValue ->
+                                // Allow digits and single decimal, max 2 decimal places
+                                val filtered = newValue.filter { it.isDigit() || it == '.' }
+                                val parts = filtered.split(".")
+                                val valid = when {
+                                    parts.size > 2 -> false
+                                    parts.size == 2 && parts[1].length > 2 -> false
+                                    else -> true
+                                }
+                                if (valid) {
+                                    textValue = filtered
+                                    val parsed = filtered.toDoubleOrNull() ?: 0.0
+                                    onManualAmountChange(parsed)
+                                }
+                            },
+                            modifier = Modifier
+                                .width(80.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                    shape = RoundedCornerShape(8.dp),
+                                )
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            textStyle = TextStyle(
+                                fontFamily = ManropeBold,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.End,
+                            ),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal,
+                            ),
+                        )
+                    }
+                } else if (isSelected && amount != null) {
                     Text(
                         text = "₹${formatAmount(amount)}",
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -657,26 +925,4 @@ private fun GlassmorphismCtaBar(
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-internal fun formatAmount(amount: Double): String {
-    val long = (amount * 100).toLong()
-    val intPart = long / 100
-    val fracPart = long % 100
-    val intStr = formatIndianGrouping(intPart)
-    return if (fracPart == 0L) intStr else "$intStr.${fracPart.toString().padStart(2, '0')}"
-}
-
-private fun formatIndianGrouping(number: Long): String {
-    if (number == 0L) return "0"
-    val str = number.toString()
-    if (str.length <= 3) return str
-    val lastThree = str.takeLast(3)
-    val remaining = str.dropLast(3)
-    val groups = mutableListOf<String>()
-    var i = remaining.length
-    while (i > 0) {
-        val start = maxOf(0, i - 2)
-        groups.add(0, remaining.substring(start, i))
-        i = start
-    }
-    return groups.joinToString(",") + "," + lastThree
-}
+internal fun formatAmount(amount: Double): String = AmountFormatter.format(amount)

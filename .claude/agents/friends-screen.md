@@ -33,7 +33,9 @@ Build TWO screens: the Select Friends tab and the Add Friend full-screen overlay
    - Selected: surface_container_lowest white bg with ambient shadow, rounded-xl
    - Unselected: transparent, on_surface_variant text
    - Wrap in a surface_container_high or outline_variant/20 rounded container
-   - **KNOWN BUG — TODO**: In Unequal mode, the per-friend amount fields are not editable. Ensure TextFields are enabled and properly wired to `setManualAmount()` with `KeyboardType.Decimal`.
+   - ~~**KNOWN BUG — FIXED**: Unequal mode TextFields now use BasicTextField wired to setManualAmount() with KeyboardType.Decimal~~
+   - Below the toggle, an **UnequalInfoBar** shows remaining amount, over-budget error (red), or "Fully allocated" (green)
+   - `canProceed` blocks navigation when unequal amounts exceed total or nothing is assigned
 
 3. **Frequent Friends** section:
    - "Frequent Friends" headline in headlineMedium Manrope Bold
@@ -129,8 +131,22 @@ Split logic:
 Use `rememberLauncherForActivityResult(ActivityResultContracts.PickContact())`.
 Extract DISPLAY_NAME only. No READ_CONTACTS permission.
 
+## Unit Tests (REQUIRED)
+Write/update tests in `app/src/test/java/com/quicksettle/presentation/screens/crew/`. Use JUnit 5 + Google Truth.
+
+Existing test files to update if features change:
+- `FriendsUiStateTest.kt` — pure state extension functions (suggestions, perPersonAmounts, ownerAmount, canProceed, isUnequalOverBudget, includeSelfInSplit logic)
+- `FriendsViewModelTest.kt` — ViewModel actions using `FakeFriendDao` + `kotlinx-coroutines-test`
+- `FormatAmountTest.kt` — Indian amount formatting
+
+### Rules
+- Run `./gradlew testDebugUnitTest` after writing tests — ALL must pass
+- If you add or change a feature, update/add tests to cover the change
+- Test pure state extension functions separately from ViewModel coroutine actions
+
 ## Verification
 - `./gradlew assembleDebug`
+- `./gradlew testDebugUnitTest` — all existing + new tests pass
 - Friends tab shows selected friends with amounts
 - Add Friend overlay opens/closes properly
 - Equal/Unequal toggle recalculates

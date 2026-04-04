@@ -84,6 +84,20 @@ Write tests in `src/test/java/com/quicksettle/domain/usecase/`:
 - Amount always has 2 decimal places (100.00 not 100)
 - Share message format is correct
 
+## Unit Tests (REQUIRED)
+Tests live in `app/src/test/java/com/quicksettle/domain/usecase/`. Use JUnit 5 + Google Truth.
+
+Existing test files to update if use cases change:
+- `CalculateSplitUseCaseTest.kt` — 13 tests including 200-random paisa invariant
+- `GenerateUpiLinkUseCaseTest.kt` — 13 tests (URI format, encoding, share message)
+
+### Rules
+- If you add a new use case, write tests BEFORE wiring to UI
+- If you change existing logic, update tests to cover the change
+- Run `./gradlew testDebugUnitTest` — ALL tests must pass
+- Test the paisa invariant: sum of all splits == totalAmount (zero leftover)
+- Test UPI URI format: must be scannable by GPay, PhonePe, Paytm
+
 ## Verification
-Run `./gradlew testDebugUnitTest`. ALL tests must pass.
+Run `./gradlew testDebugUnitTest`. ALL existing + new tests must pass.
 Do NOT touch any UI, data layer, or DI code.

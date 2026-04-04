@@ -102,9 +102,29 @@ fun QrCodeImage(content: String, sizeDp: Dp, modifier: Modifier = Modifier)
 For MVP, all settlements from the current split session start as "PENDING".
 The status display is visual-only (no backend tracking).
 
+## Unit Tests (REQUIRED)
+Write tests in `app/src/test/java/com/quicksettle/presentation/screens/settle/`. Use JUnit 5 + Google Truth.
+
+### SettleViewModelTest
+- Test `toggleQr` flips `showQr` for the correct index only
+- Test `markPaid` updates status to PAID for the correct item
+- Test `totalToCollect` sums only non-PAID settlements
+- Test `activeDebtsCount` counts only non-PAID settlements
+- Test state initialization from session data
+- Use a fake DAO (see `FriendsViewModelTest` for pattern) and `kotlinx-coroutines-test`
+
+### SettlementStatusTest (if status logic exists)
+- Test status display text for PENDING, URGENT, DUE_TODAY, PAID
+- Test status badge color mapping
+
+### General rules
+- Run `./gradlew testDebugUnitTest` after writing tests — all must pass
+- If you add or change features, update existing tests to cover the change
+- Test pure state extension functions separately from ViewModel actions
+
 ## Verification
 - `./gradlew assembleDebug`
-- `./gradlew testDebugUnitTest` — all tests pass
+- `./gradlew testDebugUnitTest` — all existing + new tests pass
 - Settle tab shows settlement cards matching the Stitch design
 - QR codes render and contain valid UPI URIs
 - WhatsApp share works (or falls back to generic share)

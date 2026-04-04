@@ -24,6 +24,7 @@ data class FriendsUiState(
     val totalAmount: Double = 0.0,
     val description: String = "",
     val splitMode: SplitMode = SplitMode.EQUAL,
+    val includeSelfInSplit: Boolean = true,
     val selectedFriends: List<SelectedFriend> = emptyList(),
     val frequentFriends: List<Friend> = emptyList(),
     val searchQuery: String = "",
@@ -41,65 +42,61 @@ val FriendsUiState.suggestions: List<Friend>
     }
 
 /**
- * Per-person amounts using CalculateSplitUseCase.
- * The owner (current user) is always participant slot index 0.
- * Returns a map of friendId → amountOwed.
+ * Computes per-person amounts and owner amount using CalculateSplitUseCase.
+ * Returns a pair of (friendId → amountOwed map, ownerAmount).
+ * This is called inside the ViewModel to keep use-case logic out of Composables.
  */
-fun FriendsUiState.perPersonAmounts(useCase: CalculateSplitUseCase): Map<String, Double> {
-    if (selectedFriends.isEmpty()) return emptyMap()
+fun FriendsUiState.computeSplit(useCase: CalculateSplitUseCase): Pair<Map<String, Double>, Double> {
+    if (selectedFriends.isEmpty()) return emptyMap<String, Double>() to totalAmount
     return when (splitMode) {
         SplitMode.EQUAL -> {
+            val numberOfPeople = if (includeSelfInSplit) {
+                selectedFriends.size + 1
+            } else {
+                selectedFriends.size
+            }
             val splits = useCase.equalSplit(
                 totalAmount = totalAmount,
-                numberOfPeople = selectedFriends.size + 1, // +1 for the owner
+                numberOfPeople = numberOfPeople,
             )
-            // index 0 is the owner's share; indices 1..n map to selected friends
-            selectedFriends.mapIndexed { index, sf ->
-                sf.friend.id to splits[index + 1]
-            }.toMap()
+            val amounts = if (includeSelfInSplit) {
+                selectedFriends.mapIndexed { index, sf ->
+                    sf.friend.id to splits[index + 1]
+                }.toMap()
+            } else {
+                selectedFriends.mapIndexed { index, sf ->
+                    sf.friend.id to splits[index]
+                }.toMap()
+            }
+            val ownerAmt = if (includeSelfInSplit) splits[0] else 0.0
+            amounts to ownerAmt
         }
         SplitMode.UNEQUAL -> {
-            val fixedAmounts = selectedFriends.associate { sf ->
+            val amounts = selectedFriends.associate { sf ->
                 sf.friend.id to sf.manualAmount
             }
-            // remaining is what the owner owes; each friend keeps their manualAmount
-            selectedFriends.associate { sf ->
-                sf.friend.id to sf.manualAmount
-            }
+            val friendsTotal = selectedFriends.sumOf { (it.manualAmount * 100).toLong() }
+            val ownerAmt = ((totalAmount * 100).toLong() - friendsTotal) / 100.0
+            amounts to ownerAmt
         }
     }
 }
 
-val FriendsUiState.ownerAmount: Double
-    get() {
-        if (selectedFriends.isEmpty()) return totalAmount
-        return when (splitMode) {
-            SplitMode.EQUAL -> {
-                val totalParts = selectedFriends.size + 1
-                // Owner always gets the first share from equal split (may have 1 extra paisa)
-                val totalPaisa = (totalAmount * 100).toLong()
-                val base = totalPaisa / totalParts
-                val remainder = (totalPaisa % totalParts).toInt()
-                val ownerPaisa = if (0 < remainder) base + 1 else base
-                ownerPaisa / 100.0
-            }
-            SplitMode.UNEQUAL -> {
-                val totalFixed = selectedFriends.sumOf { it.manualAmount }
-                val remaining = (totalAmount * 100).toLong() - (totalFixed * 100).toLong()
-                remaining / 100.0
-            }
-        }
-    }
-
-val FriendsUiState.unequalRemaining: Double
-    get() {
-        val totalFixed = selectedFriends.sumOf { it.manualAmount }
-        val remaining = (totalAmount * 100).toLong() - (totalFixed * 100).toLong()
-        return remaining / 100.0
-    }
+val FriendsUiState.isUnequalOverBudget: Boolean
+    get() = splitMode == SplitMode.UNEQUAL &&
+        selectedFriends.sumOf { (it.manualAmount * 100).toLong() } > (totalAmount * 100).toLong()
 
 val FriendsUiState.canProceed: Boolean
-    get() = selectedFriends.isNotEmpty() && totalAmount > 0.0
+    get() {
+        if (selectedFriends.isEmpty() || totalAmount <= 0.0) return false
+        if (splitMode == SplitMode.UNEQUAL) {
+            val friendsTotal = selectedFriends.sumOf { (it.manualAmount * 100).toLong() }
+            val totalPaisa = (totalAmount * 100).toLong()
+            // Friends' amounts must not exceed total, and at least some amount must be assigned
+            return friendsTotal in 1..totalPaisa
+        }
+        return true
+    }
 
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
@@ -109,6 +106,13 @@ class FriendsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(FriendsUiState())
     val uiState: StateFlow<FriendsUiState> = _uiState.asStateFlow()
+
+    /**
+     * Computes the current split. Called from the Composable to get amounts
+     * without exposing the use case to the UI layer.
+     */
+    fun currentSplit(): Pair<Map<String, Double>, Double> =
+        _uiState.value.computeSplit(calculateSplitUseCase)
 
     init {
         viewModelScope.launch {
@@ -153,6 +157,10 @@ class FriendsViewModel @Inject constructor(
                 splitMode = if (state.splitMode == SplitMode.EQUAL) SplitMode.UNEQUAL else SplitMode.EQUAL,
             )
         }
+    }
+
+    fun toggleIncludeSelf() {
+        _uiState.update { it.copy(includeSelfInSplit = !it.includeSelfInSplit) }
     }
 
     fun setManualAmount(friendId: String, amount: Double) {

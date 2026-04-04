@@ -95,6 +95,7 @@ dependencies {
     testRuntimeOnly(libs.junit.jupiter.engine)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.google.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // Instrumented Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))

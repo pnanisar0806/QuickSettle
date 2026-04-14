@@ -1,6 +1,8 @@
 package com.quicksettle.data.local
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,13 +22,27 @@ class UserProfileStore @Inject constructor(@ApplicationContext context: Context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
 
-    private val prefs = EncryptedSharedPreferences.create(
-        context,
-        "quicksettle_user_profile",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-    )
+    private val prefs: SharedPreferences = try {
+        EncryptedSharedPreferences.create(
+            context,
+            PREFS_FILE,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+        )
+    } catch (e: Exception) {
+        // Keystore keys corrupted (common on emulators / after backup restore).
+        // Delete the corrupted file and recreate.
+        Log.w("UserProfileStore", "EncryptedSharedPreferences corrupted, resetting", e)
+        context.deleteSharedPreferences(PREFS_FILE)
+        EncryptedSharedPreferences.create(
+            context,
+            PREFS_FILE,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+        )
+    }
 
     /**
      * Persists the user's display name and UPI VPA together as an atomic operation.
@@ -59,6 +75,7 @@ class UserProfileStore @Inject constructor(@ApplicationContext context: Context)
     }
 
     private companion object {
+        const val PREFS_FILE = "quicksettle_user_profile"
         const val KEY_DISPLAY_NAME = "display_name"
         const val KEY_UPI_ID = "upi_id"
     }

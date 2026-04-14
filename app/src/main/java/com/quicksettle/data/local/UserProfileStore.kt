@@ -14,7 +14,7 @@ import javax.inject.Singleton
  * are never written to disk.
  */
 @Singleton
-class UserProfileStore @Inject constructor(@ApplicationContext context: Context) {
+class UserProfileStore @Inject constructor(@ApplicationContext context: Context) : UserProfile {
 
     private val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -39,15 +39,15 @@ class UserProfileStore @Inject constructor(@ApplicationContext context: Context)
     }
 
     /** Returns the stored display name, or null if not yet set. */
-    fun getDisplayName(): String? = prefs.getString(KEY_DISPLAY_NAME, null)
+    override fun getDisplayName(): String? = prefs.getString(KEY_DISPLAY_NAME, null)
 
     /** Returns the stored UPI VPA, or null if not yet set. */
-    fun getUpiId(): String? = prefs.getString(KEY_UPI_ID, null)
+    override fun getUpiId(): String? = prefs.getString(KEY_UPI_ID, null)
 
     /**
      * Returns true only when both a non-blank name and a non-blank UPI ID have been saved.
      */
-    fun isProfileSetup(): Boolean =
+    override fun isProfileSetup(): Boolean =
         !getDisplayName().isNullOrBlank() && !getUpiId().isNullOrBlank()
 
     /** Removes all stored profile data. */

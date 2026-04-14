@@ -18,3 +18,5 @@ local.properties
 .vscode
 .idea
 .claude/settings.local.json
+.obsidian
+notes/

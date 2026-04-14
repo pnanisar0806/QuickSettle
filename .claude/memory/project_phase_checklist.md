@@ -52,18 +52,21 @@ type: project
 - [x] FriendChip component — avatar initial circle, name label, selected state with primary_fixed bg
 - [x] Unequal mode — editable BasicTextField with KeyboardType.Decimal, wired to setManualAmount()
 
-### Phase 5 — Settle Screen: NOT COMPLETE (placeholder only)
-- [ ] SettleScreen — **only shows centered "Settlement List" text**
-- [ ] SettleViewModel — **does not exist**
-- [ ] "Total to Collect" header with display-lg amount
-- [ ] Active debts badge (secondary_container pill)
-- [ ] Settlement cards (avatar, name, description, amount, status badge, Show QR + WhatsApp buttons)
-- [ ] QrCodeImage component — **placeholder (empty body)**
-- [ ] QR code toggle with AnimatedVisibility
-- [ ] WhatsApp share intent (with fallback to generic share)
-- [ ] "Settle All Balances" CTA with glassmorphism bar
-- [ ] Status logic (PENDING, URGENT, DUE_TODAY, PAID)
-- [ ] End-to-end flow: Amount tab → Friends tab → Settle tab with data passing
+### Phase 5 — Settle Screen: COMPLETE (verified 2026-04-14)
+- [x] SettleViewModel — state management with settlements, toggleQr, markPaid, settleAllMessage
+- [x] UserProfile interface extracted for testability, Hilt binding in AppModule
+- [x] SettleViewModelTest — 20 tests (init, setSettlementData, toggleQr, markPaid, settleAll)
+- [x] SettlementStatusTest — 9 tests (displayText, badgeColor for all statuses)
+- [x] QrCodeImage — ZXing QR rendering, black-on-white, memoized on (content, sizePx)
+- [x] SettleScreen — TotalToCollect header with display-lg amount
+- [x] Active debts badge (secondary_container pill)
+- [x] Settlement cards (avatar, name, description, amount, status badge, Show QR + WhatsApp buttons)
+- [x] QR code toggle with AnimatedVisibility (fadeIn + expandVertically)
+- [x] WhatsApp share intent with fallback to generic share
+- [x] "Settle All Balances" CTA with glassmorphism bar
+- [x] Status logic (PENDING, URGENT, DUE_TODAY, PAID) with displayText + badgeColor
+- [x] NavGraph wired: Entry→Crew→Settle end-to-end data flow
+- [x] assembleDebug + testDebugUnitTest pass
 
 ### Phase 6 — Polish: NOT STARTED
 - [ ] Edge cases + final QA

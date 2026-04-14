@@ -63,9 +63,7 @@ fun NavGraph(
                 onAddFriend = { navController.navigate(Screen.AddFriend.route) },
                 onNavigateToSettle = {
                     navController.navigate(Screen.Settle.route) {
-                        popUpTo(Screen.Entry.route) { saveState = true }
                         launchSingleTop = true
-                        restoreState = true
                     }
                 },
                 viewModel = friendsViewModel,

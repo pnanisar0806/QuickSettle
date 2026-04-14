@@ -12,9 +12,12 @@ import androidx.navigation.compose.composable
 import com.quicksettle.presentation.screens.crew.AddFriendScreen
 import com.quicksettle.presentation.screens.crew.CrewScreen
 import com.quicksettle.presentation.screens.crew.FriendsViewModel
+import com.quicksettle.presentation.screens.crew.computeSplit
 import com.quicksettle.presentation.screens.entry.EntryScreen
 import com.quicksettle.presentation.screens.entry.EntryViewModel
 import com.quicksettle.presentation.screens.settle.SettleScreen
+import com.quicksettle.presentation.screens.settle.SettleViewModel
+import com.quicksettle.presentation.screens.settle.SplitEntry
 
 @Composable
 fun NavGraph(
@@ -69,7 +72,37 @@ fun NavGraph(
             )
         }
         composable(route = Screen.Settle.route) {
-            SettleScreen()
+            // Access EntryViewModel for description
+            val entryBackStackEntry = navController.getBackStackEntry(Screen.Entry.route)
+            val entryViewModel: EntryViewModel = hiltViewModel(entryBackStackEntry)
+            val entryState by entryViewModel.uiState.collectAsStateWithLifecycle()
+
+            // Access FriendsViewModel for split data
+            val crewBackStackEntry = navController.getBackStackEntry(Screen.Crew.route)
+            val friendsViewModel: FriendsViewModel = hiltViewModel(crewBackStackEntry)
+            val friendsState by friendsViewModel.uiState.collectAsStateWithLifecycle()
+
+            val settleViewModel: SettleViewModel = hiltViewModel()
+
+            // Forward split data whenever friends state changes
+            LaunchedEffect(friendsState.selectedFriends, friendsState.splitMode, friendsState.includeSelfInSplit) {
+                val (amounts, _) = friendsState.computeSplit(
+                    com.quicksettle.domain.usecase.CalculateSplitUseCase()
+                )
+                val description = entryState.description.ifBlank { "Bill Split" }
+                val splits = friendsState.selectedFriends
+                    .filter { sf -> (amounts[sf.friend.id] ?: 0.0) > 0.0 }
+                    .map { sf ->
+                        SplitEntry(
+                            name = sf.friend.name,
+                            amount = amounts[sf.friend.id] ?: 0.0,
+                            upiId = sf.friend.upiId,
+                        )
+                    }
+                settleViewModel.setSettlementData(description = description, splits = splits)
+            }
+
+            SettleScreen(viewModel = settleViewModel)
         }
         composable(route = Screen.AddFriend.route) {
             // Reuse the FriendsViewModel scoped to Crew so selections are preserved

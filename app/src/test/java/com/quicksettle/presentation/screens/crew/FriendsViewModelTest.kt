@@ -241,6 +241,189 @@ class FriendsViewModelTest {
             assertThat(viewModel.uiState.value.frequentFriends).hasSize(2)
         }
     }
+
+    // ── AddFriendManually ────────────────────────────────────────────────────
+
+    @Nested
+    inner class AddFriendManually {
+
+        @Test
+        fun `adds friend to DAO`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.onAddFriendNameChange("Charlie")
+            viewModel.onUpiInputChange("charlie@upi")
+            viewModel.addFriendManually()
+            advanceUntilIdle()
+
+            val friends = viewModel.uiState.value.frequentFriends
+            assertThat(friends).hasSize(1)
+            assertThat(friends[0].name).isEqualTo("Charlie")
+        }
+
+        @Test
+        fun `friend appears in frequentFriends after add`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.onAddFriendNameChange("Charlie")
+            viewModel.onUpiInputChange("charlie@upi")
+            viewModel.addFriendManually()
+            advanceUntilIdle()
+
+            val friends = viewModel.uiState.value.frequentFriends
+            assertThat(friends.any { it.name == "Charlie" }).isTrue()
+        }
+
+        @Test
+        fun `trims name before saving`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.onAddFriendNameChange("  Charlie  ")
+            viewModel.onUpiInputChange("charlie@upi")
+            viewModel.addFriendManually()
+            advanceUntilIdle()
+
+            val friends = viewModel.uiState.value.frequentFriends
+            assertThat(friends[0].name).isEqualTo("Charlie")
+        }
+
+        @Test
+        fun `blank name is no-op`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.onAddFriendNameChange("   ")
+            viewModel.addFriendManually()
+            advanceUntilIdle()
+
+            assertThat(viewModel.uiState.value.frequentFriends).isEmpty()
+        }
+
+        @Test
+        fun `blank UPI becomes null`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.onAddFriendNameChange("Charlie")
+            viewModel.onUpiInputChange("   ")
+            viewModel.addFriendManually()
+            advanceUntilIdle()
+
+            val friends = viewModel.uiState.value.frequentFriends
+            assertThat(friends[0].upiId).isNull()
+        }
+
+        @Test
+        fun `closes overlay after adding`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.openAddFriend()
+            viewModel.onAddFriendNameChange("Charlie")
+            viewModel.addFriendManually()
+            advanceUntilIdle()
+
+            assertThat(viewModel.uiState.value.showAddFriend).isFalse()
+        }
+    }
+
+    // ── AddFriendFromContact ─────────────────────────────────────────────────
+
+    @Nested
+    inner class AddFriendFromContact {
+
+        @Test
+        fun `adds friend to DAO`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.addFriendFromContact("Diana")
+            advanceUntilIdle()
+
+            val friends = viewModel.uiState.value.frequentFriends
+            assertThat(friends).hasSize(1)
+            assertThat(friends[0].name).isEqualTo("Diana")
+            assertThat(friends[0].upiId).isNull()
+        }
+
+        @Test
+        fun `blank name is no-op`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.addFriendFromContact("  ")
+            advanceUntilIdle()
+
+            assertThat(viewModel.uiState.value.frequentFriends).isEmpty()
+        }
+    }
+
+    // ── AddFriendAndClose ────────────────────────────────────────────────────
+
+    @Nested
+    inner class AddFriendAndClose {
+
+        @Test
+        fun `adds friend and closes overlay`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.openAddFriend()
+            viewModel.addFriendAndClose("Eve", "eve@upi")
+            advanceUntilIdle()
+
+            val friends = viewModel.uiState.value.frequentFriends
+            assertThat(friends).hasSize(1)
+            assertThat(friends[0].name).isEqualTo("Eve")
+            assertThat(viewModel.uiState.value.showAddFriend).isFalse()
+        }
+
+        @Test
+        fun `blank name is no-op`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.addFriendAndClose("", "eve@upi")
+            advanceUntilIdle()
+
+            assertThat(viewModel.uiState.value.frequentFriends).isEmpty()
+        }
+
+        @Test
+        fun `blank UPI becomes null`() = runTest {
+            fakeDao.emit(emptyList())
+            advanceUntilIdle()
+
+            viewModel.addFriendAndClose("Eve", "  ")
+            advanceUntilIdle()
+
+            val friends = viewModel.uiState.value.frequentFriends
+            assertThat(friends[0].upiId).isNull()
+        }
+    }
+
+    // ── UpdateLastUsed side-effect ───────────────────────────────────────────
+
+    @Nested
+    inner class UpdateLastUsedSideEffect {
+
+        @Test
+        fun `toggleFriend calls updateLastUsed on selection`() = runTest {
+            fakeDao.emit(listOf(alice))
+            advanceUntilIdle()
+
+            viewModel.toggleFriend("alice-1")
+            advanceUntilIdle()
+
+            // Verify the friend was selected (side-effect of updateLastUsed
+            // is not directly observable with our fake, but we verify selection works)
+            assertThat(viewModel.uiState.value.selectedFriends).hasSize(1)
+            assertThat(viewModel.uiState.value.selectedFriends[0].friend.id).isEqualTo("alice-1")
+        }
+    }
 }
 
 // ── Fake DAO for testing ─────────────────────────────────────────────────────

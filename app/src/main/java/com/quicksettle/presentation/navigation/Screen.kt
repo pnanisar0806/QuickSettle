@@ -18,4 +18,7 @@ sealed class Screen(val route: String) {
 
     /** Add-friend overlay — name, UPI ID, contact picker */
     data object AddFriend : Screen("add_friend")
+
+    /** Profile screen — edit display name and UPI VPA */
+    data object Profile : Screen("profile")
 }

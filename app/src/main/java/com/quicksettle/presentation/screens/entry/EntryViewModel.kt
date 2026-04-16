@@ -1,7 +1,7 @@
 package com.quicksettle.presentation.screens.entry
 
 import androidx.lifecycle.ViewModel
-import com.quicksettle.data.local.UserProfileStore
+import com.quicksettle.data.local.UserProfile
 import com.quicksettle.presentation.util.AmountFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,13 +25,13 @@ val EntryUiState.formattedAmount: String
 
 @HiltViewModel
 class EntryViewModel @Inject constructor(
-    private val userProfileStore: UserProfileStore,
+    private val userProfile: UserProfile,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         EntryUiState(
-            showOnboarding = !userProfileStore.isProfileSetup(),
-            displayName = userProfileStore.getDisplayName() ?: "",
+            showOnboarding = !userProfile.isProfileSetup(),
+            displayName = userProfile.getDisplayName() ?: "",
         )
     )
     val uiState: StateFlow<EntryUiState> = _uiState.asStateFlow()
@@ -67,7 +67,7 @@ class EntryViewModel @Inject constructor(
     }
 
     fun onProfileSaved(name: String, upiId: String) {
-        userProfileStore.saveProfile(name = name, upiId = upiId)
+        userProfile.saveProfile(name = name, upiId = upiId)
         _uiState.update { state ->
             state.copy(
                 showOnboarding = false,

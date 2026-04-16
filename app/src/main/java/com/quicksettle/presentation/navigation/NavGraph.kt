@@ -16,6 +16,7 @@ import com.quicksettle.presentation.screens.crew.FriendsViewModel
 import com.quicksettle.presentation.screens.crew.computeSplit
 import com.quicksettle.presentation.screens.entry.EntryScreen
 import com.quicksettle.presentation.screens.entry.EntryViewModel
+import com.quicksettle.presentation.screens.profile.ProfileScreen
 import com.quicksettle.presentation.screens.settle.SettleScreen
 import com.quicksettle.presentation.screens.settle.SettleViewModel
 import com.quicksettle.presentation.screens.settle.SplitEntry
@@ -91,6 +92,10 @@ fun NavGraph(
             val entryState by entryViewModel.uiState.collectAsStateWithLifecycle()
             val friendsState by friendsViewModel.uiState.collectAsStateWithLifecycle()
 
+            // Re-read profile every time the Settle tab enters composition
+            // (covers the case where the user updated their VPA on the Profile screen).
+            LaunchedEffect(Unit) { settleViewModel.refreshProfile() }
+
             // Forward split data whenever friends state changes
             LaunchedEffect(friendsState.selectedFriends, friendsState.splitMode, friendsState.includeSelfInSplit) {
                 val (amounts, _) = friendsState.computeSplit(
@@ -120,6 +125,11 @@ fun NavGraph(
             AddFriendScreen(
                 onDismiss = { navController.popBackStack() },
                 viewModel = friendsViewModel,
+            )
+        }
+        composable(route = Screen.Profile.route) {
+            ProfileScreen(
+                onBack = { navController.popBackStack() },
             )
         }
     }

@@ -47,7 +47,7 @@ class UserProfileStore @Inject constructor(@ApplicationContext context: Context)
     /**
      * Persists the user's display name and UPI VPA together as an atomic operation.
      */
-    fun saveProfile(name: String, upiId: String) {
+    override fun saveProfile(name: String, upiId: String) {
         prefs.edit()
             .putString(KEY_DISPLAY_NAME, name)
             .putString(KEY_UPI_ID, upiId)
@@ -67,7 +67,7 @@ class UserProfileStore @Inject constructor(@ApplicationContext context: Context)
         !getDisplayName().isNullOrBlank() && !getUpiId().isNullOrBlank()
 
     /** Removes all stored profile data. */
-    fun clearProfile() {
+    override fun clearProfile() {
         prefs.edit()
             .remove(KEY_DISPLAY_NAME)
             .remove(KEY_UPI_ID)

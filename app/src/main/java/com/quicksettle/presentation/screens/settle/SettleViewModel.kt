@@ -87,10 +87,13 @@ class SettleViewModel @Inject constructor(
      */
     fun setSettlementData(description: String, splits: List<SplitEntry>) {
         val prefixedDescription = "Shared: $description"
-        val vpa = _uiState.value.userVpa
+        // Always read fresh from profile — the user may have updated it on the Profile screen.
+        val vpa = userProfile.getUpiId() ?: ""
+        val name = userProfile.getDisplayName() ?: ""
+        _uiState.update { it.copy(userVpa = vpa, userDisplayName = name) }
 
         val items = splits.map { entry ->
-            val upiUri = if (vpa.isNotBlank() && entry.upiId != null) {
+            val upiUri = if (vpa.isNotBlank()) {
                 generateUpiLinkUseCase.generateUri(
                     vpa = vpa,
                     name = entry.name,
@@ -130,6 +133,41 @@ class SettleViewModel @Inject constructor(
                 settlements = items,
                 totalToCollect = total,
                 activeDebtsCount = activeCount,
+            )
+        }
+    }
+
+    /**
+     * Re-reads the user profile and regenerates UPI URIs for all existing settlements.
+     * Call when returning to the Settle tab after a potential profile edit.
+     */
+    fun refreshProfile() {
+        val vpa = userProfile.getUpiId() ?: ""
+        val name = userProfile.getDisplayName() ?: ""
+        _uiState.update { state ->
+            val updated = state.settlements.map { item ->
+                val newUri = if (vpa.isNotBlank()) {
+                    generateUpiLinkUseCase.generateUri(
+                        vpa = vpa,
+                        name = item.participantName,
+                        amount = item.amount,
+                        description = item.description,
+                    )
+                } else {
+                    ""
+                }
+                val newShareMessage = generateUpiLinkUseCase.generateShareMessage(
+                    name = item.participantName,
+                    amount = item.amount,
+                    description = item.description,
+                    upiLink = newUri,
+                )
+                item.copy(upiUri = newUri, shareMessage = newShareMessage)
+            }
+            state.copy(
+                settlements = updated,
+                userVpa = vpa,
+                userDisplayName = name,
             )
         }
     }

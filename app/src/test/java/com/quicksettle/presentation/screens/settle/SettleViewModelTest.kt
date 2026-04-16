@@ -1,24 +1,11 @@
 package com.quicksettle.presentation.screens.settle
 
 import com.google.common.truth.Truth.assertThat
-import com.quicksettle.data.local.UserProfile
 import com.quicksettle.domain.usecase.GenerateUpiLinkUseCase
+import com.quicksettle.testutil.FakeUserProfile
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-
-// ── Fake UserProfile ──────────────────────────────────────────────────────────
-
-class FakeUserProfile(
-    private val displayName: String?,
-    private val upiId: String?,
-) : UserProfile {
-    override fun getDisplayName(): String? = displayName
-    override fun getUpiId(): String? = upiId
-    override fun isProfileSetup(): Boolean = !displayName.isNullOrBlank() && !upiId.isNullOrBlank()
-}
-
-// ── Test Suite ────────────────────────────────────────────────────────────────
 
 class SettleViewModelTest {
 
@@ -30,14 +17,23 @@ class SettleViewModelTest {
         SplitEntry(name = "Charlie", amount = 100.0, upiId = "charlie@upi"),
     )
 
+    private val testSplitsNoUpi = listOf(
+        SplitEntry(name = "Alice", amount = 250.0, upiId = null),
+        SplitEntry(name = "Bob", amount = 150.0, upiId = null),
+    )
+
+    private lateinit var fakeProfile: FakeUserProfile
+
     private fun makeViewModel(
         displayName: String? = "TestUser",
         upiId: String? = "testuser@upi",
-    ): SettleViewModel =
-        SettleViewModel(
+    ): SettleViewModel {
+        fakeProfile = FakeUserProfile(displayName = displayName, upiId = upiId)
+        return SettleViewModel(
             generateUpiLinkUseCase = useCase,
-            userProfile = FakeUserProfile(displayName = displayName, upiId = upiId),
+            userProfile = fakeProfile,
         )
+    }
 
     // ── Initialization ────────────────────────────────────────────────────────
 
@@ -246,6 +242,106 @@ class SettleViewModelTest {
             assertThat(message).doesNotContain("Alice")
             assertThat(message).contains("Bob")
             assertThat(message).contains("Charlie")
+        }
+    }
+
+    // ── RefreshProfile ───────────────────────────────────────────────────────
+
+    @Nested
+    inner class RefreshProfile {
+
+        @Test
+        fun `refreshProfile re-reads VPA from store`() {
+            val vm = makeViewModel(displayName = "Old", upiId = "old@upi")
+            vm.setSettlementData(description = "Dinner", splits = testSplits)
+
+            // Simulate profile edit
+            fakeProfile.saveProfile(name = "New", upiId = "new@ybl")
+            vm.refreshProfile()
+
+            assertThat(vm.uiState.value.userVpa).isEqualTo("new@ybl")
+            assertThat(vm.uiState.value.userDisplayName).isEqualTo("New")
+        }
+
+        @Test
+        fun `refreshProfile regenerates URIs with new VPA`() {
+            val vm = makeViewModel(displayName = "Old", upiId = "old@upi")
+            vm.setSettlementData(description = "Dinner", splits = testSplits)
+
+            fakeProfile.saveProfile(name = "New", upiId = "new@ybl")
+            vm.refreshProfile()
+
+            vm.uiState.value.settlements.forEach { item ->
+                assertThat(item.upiUri).contains("pa=new@ybl")
+                assertThat(item.upiUri).doesNotContain("old@upi")
+            }
+        }
+
+        @Test
+        fun `refreshProfile regenerates share messages with new UPI link`() {
+            val vm = makeViewModel(displayName = "Old", upiId = "old@upi")
+            vm.setSettlementData(description = "Dinner", splits = testSplits)
+
+            fakeProfile.saveProfile(name = "New", upiId = "new@ybl")
+            vm.refreshProfile()
+
+            vm.uiState.value.settlements.forEach { item ->
+                assertThat(item.shareMessage).contains("new@ybl")
+            }
+        }
+
+        @Test
+        fun `refreshProfile blank VPA produces empty URIs`() {
+            val vm = makeViewModel(displayName = "User", upiId = "user@upi")
+            vm.setSettlementData(description = "Dinner", splits = testSplits)
+
+            fakeProfile.saveProfile(name = "User", upiId = "")
+            // clearProfile sets null, but we want blank — saveProfile with empty works
+            fakeProfile.clearProfile()
+            vm.refreshProfile()
+
+            vm.uiState.value.settlements.forEach { item ->
+                assertThat(item.upiUri).isEmpty()
+            }
+        }
+    }
+
+    // ── QR generation edge cases ─────────────────────────────────────────────
+
+    @Nested
+    inner class QrGenerationEdgeCases {
+
+        @Test
+        fun `generates URI even when friend has no UPI ID`() {
+            val vm = makeViewModel(displayName = "User", upiId = "user@upi")
+            vm.setSettlementData(description = "Lunch", splits = testSplitsNoUpi)
+
+            vm.uiState.value.settlements.forEach { item ->
+                assertThat(item.upiUri).startsWith("upi://pay?pa=user@upi")
+            }
+        }
+
+        @Test
+        fun `setSettlementData reads fresh VPA not cached init value`() {
+            val vm = makeViewModel(displayName = "Old", upiId = "old@upi")
+
+            // Change profile after VM init but before setSettlementData
+            fakeProfile.saveProfile(name = "New", upiId = "fresh@upi")
+            vm.setSettlementData(description = "Dinner", splits = testSplits)
+
+            vm.uiState.value.settlements.forEach { item ->
+                assertThat(item.upiUri).contains("pa=fresh@upi")
+            }
+        }
+
+        @Test
+        fun `empty user VPA produces empty URI regardless of friend UPI`() {
+            val vm = makeViewModel(displayName = "User", upiId = "")
+            vm.setSettlementData(description = "Lunch", splits = testSplits)
+
+            vm.uiState.value.settlements.forEach { item ->
+                assertThat(item.upiUri).isEmpty()
+            }
         }
     }
 }

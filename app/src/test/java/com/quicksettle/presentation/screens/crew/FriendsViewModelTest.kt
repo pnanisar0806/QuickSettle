@@ -97,9 +97,9 @@ class FriendsViewModelTest {
         }
 
         @Test
-        fun `toggleSplitMode switches to UNEQUAL`() {
+        fun `toggleSplitMode switches to SHARES`() {
             viewModel.toggleSplitMode()
-            assertThat(viewModel.uiState.value.splitMode).isEqualTo(SplitMode.UNEQUAL)
+            assertThat(viewModel.uiState.value.splitMode).isEqualTo(SplitMode.SHARES)
         }
 
         @Test
@@ -132,21 +132,52 @@ class FriendsViewModelTest {
     }
 
     @Nested
-    inner class ManualAmountSetting {
+    inner class Shares {
         @Test
-        fun `setManualAmount updates specific friend`() = runTest {
+        fun `setShares updates only the targeted friend`() = runTest {
             fakeDao.emit(listOf(alice, bob))
             advanceUntilIdle()
-
             viewModel.toggleFriend("alice-1")
             viewModel.toggleFriend("bob-2")
-            viewModel.setManualAmount("alice-1", 200.0)
+
+            viewModel.setShares(friendId = "alice-1", shares = 3)
 
             val state = viewModel.uiState.value
-            val aliceSplit = state.selectedFriends.find { it.friend.id == "alice-1" }
-            val bobSplit = state.selectedFriends.find { it.friend.id == "bob-2" }
-            assertThat(aliceSplit?.manualAmount).isEqualTo(200.0)
-            assertThat(bobSplit?.manualAmount).isEqualTo(0.0)
+            assertThat(state.selectedFriends.first { it.friend.id == "alice-1" }.shares).isEqualTo(3)
+            assertThat(state.selectedFriends.first { it.friend.id == "bob-2" }.shares).isEqualTo(0)
+        }
+
+        @Test
+        fun `setShares clamps negative values to zero`() = runTest {
+            fakeDao.emit(listOf(alice))
+            advanceUntilIdle()
+            viewModel.toggleFriend("alice-1")
+
+            viewModel.setShares(friendId = "alice-1", shares = -5)
+
+            val state = viewModel.uiState.value
+            assertThat(state.selectedFriends.first().shares).isEqualTo(0)
+        }
+
+        @Test
+        fun `setOwnerShares updates ownerShares`() = runTest {
+            viewModel.setOwnerShares(shares = 4)
+            assertThat(viewModel.uiState.value.ownerShares).isEqualTo(4)
+        }
+
+        @Test
+        fun `setOwnerShares clamps negative values to zero`() = runTest {
+            viewModel.setOwnerShares(shares = -2)
+            assertThat(viewModel.uiState.value.ownerShares).isEqualTo(0)
+        }
+
+        @Test
+        fun `toggleSplitMode flips between EQUAL and SHARES`() = runTest {
+            assertThat(viewModel.uiState.value.splitMode).isEqualTo(SplitMode.EQUAL)
+            viewModel.toggleSplitMode()
+            assertThat(viewModel.uiState.value.splitMode).isEqualTo(SplitMode.SHARES)
+            viewModel.toggleSplitMode()
+            assertThat(viewModel.uiState.value.splitMode).isEqualTo(SplitMode.EQUAL)
         }
     }
 

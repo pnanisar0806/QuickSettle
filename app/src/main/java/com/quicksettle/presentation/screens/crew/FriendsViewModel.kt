@@ -13,11 +13,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class SplitMode { EQUAL, UNEQUAL }
+private const val OWNER_KEY = "__owner__"
+
+enum class SplitMode { EQUAL, SHARES }
 
 data class SelectedFriend(
     val friend: Friend,
-    val manualAmount: Double = 0.0,
+    val shares: Int = 0,
 )
 
 data class FriendsUiState(
@@ -25,6 +27,7 @@ data class FriendsUiState(
     val description: String = "",
     val splitMode: SplitMode = SplitMode.EQUAL,
     val includeSelfInSplit: Boolean = true,
+    val ownerShares: Int = 0,
     val selectedFriends: List<SelectedFriend> = emptyList(),
     val frequentFriends: List<Friend> = emptyList(),
     val searchQuery: String = "",
@@ -42,9 +45,11 @@ val FriendsUiState.suggestions: List<Friend>
     }
 
 /**
- * Computes per-person amounts and owner amount using CalculateSplitUseCase.
- * Returns a pair of (friendId → amountOwed map, ownerAmount).
- * This is called inside the ViewModel to keep use-case logic out of Composables.
+ * Computes per-friend amounts and owner amount using CalculateSplitUseCase.
+ * Returns (friendId → amountOwed map, ownerAmount).
+ *
+ * In SHARES mode the owner is included in the split when [includeSelfInSplit] is true,
+ * using a private internal key to avoid collision with friend IDs.
  */
 fun FriendsUiState.computeSplit(useCase: CalculateSplitUseCase): Pair<Map<String, Double>, Double> {
     if (selectedFriends.isEmpty()) return emptyMap<String, Double>() to totalAmount
@@ -71,29 +76,33 @@ fun FriendsUiState.computeSplit(useCase: CalculateSplitUseCase): Pair<Map<String
             val ownerAmt = if (includeSelfInSplit) splits[0] else 0.0
             amounts to ownerAmt
         }
-        SplitMode.UNEQUAL -> {
-            val amounts = selectedFriends.associate { sf ->
-                sf.friend.id to sf.manualAmount
+        SplitMode.SHARES -> {
+            val sharesMap = buildMap {
+                selectedFriends.forEach { put(it.friend.id, it.shares) }
+                if (includeSelfInSplit) put(OWNER_KEY, ownerShares)
             }
-            val friendsTotal = selectedFriends.sumOf { (it.manualAmount * 100).toLong() }
-            val ownerAmt = ((totalAmount * 100).toLong() - friendsTotal) / 100.0
-            amounts to ownerAmt
+            val totalShares = sharesMap.values.sum()
+            if (totalShares <= 0) {
+                // Defensive: canProceed prevents reaching here in production. Return zeros.
+                return selectedFriends.associate { it.friend.id to 0.0 } to 0.0
+            }
+            val amounts = useCase.sharesSplit(totalAmount = totalAmount, sharesByPerson = sharesMap)
+            val friendAmounts = selectedFriends.associate { sf ->
+                sf.friend.id to (amounts[sf.friend.id] ?: 0.0)
+            }
+            val ownerAmt = if (includeSelfInSplit) amounts[OWNER_KEY] ?: 0.0 else 0.0
+            friendAmounts to ownerAmt
         }
     }
 }
 
-val FriendsUiState.isUnequalOverBudget: Boolean
-    get() = splitMode == SplitMode.UNEQUAL &&
-        selectedFriends.sumOf { (it.manualAmount * 100).toLong() } > (totalAmount * 100).toLong()
-
 val FriendsUiState.canProceed: Boolean
     get() {
         if (selectedFriends.isEmpty() || totalAmount <= 0.0) return false
-        if (splitMode == SplitMode.UNEQUAL) {
-            val friendsTotal = selectedFriends.sumOf { (it.manualAmount * 100).toLong() }
-            val totalPaisa = (totalAmount * 100).toLong()
-            // Friends' amounts must not exceed total, and at least some amount must be assigned
-            return friendsTotal in 1..totalPaisa
+        if (splitMode == SplitMode.SHARES) {
+            val totalShares = selectedFriends.sumOf { it.shares } +
+                if (includeSelfInSplit) ownerShares else 0
+            return totalShares > 0
         }
         return true
     }
@@ -154,7 +163,7 @@ class FriendsViewModel @Inject constructor(
     fun toggleSplitMode() {
         _uiState.update { state ->
             state.copy(
-                splitMode = if (state.splitMode == SplitMode.EQUAL) SplitMode.UNEQUAL else SplitMode.EQUAL,
+                splitMode = if (state.splitMode == SplitMode.EQUAL) SplitMode.SHARES else SplitMode.EQUAL,
             )
         }
     }
@@ -163,14 +172,19 @@ class FriendsViewModel @Inject constructor(
         _uiState.update { it.copy(includeSelfInSplit = !it.includeSelfInSplit) }
     }
 
-    fun setManualAmount(friendId: String, amount: Double) {
+    fun setShares(friendId: String, shares: Int) {
+        val clamped = shares.coerceAtLeast(0)
         _uiState.update { state ->
             state.copy(
                 selectedFriends = state.selectedFriends.map { sf ->
-                    if (sf.friend.id == friendId) sf.copy(manualAmount = amount) else sf
+                    if (sf.friend.id == friendId) sf.copy(shares = clamped) else sf
                 },
             )
         }
+    }
+
+    fun setOwnerShares(shares: Int) {
+        _uiState.update { it.copy(ownerShares = shares.coerceAtLeast(0)) }
     }
 
     fun openAddFriend() {

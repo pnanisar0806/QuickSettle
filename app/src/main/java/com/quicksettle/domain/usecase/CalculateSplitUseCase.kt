@@ -10,7 +10,8 @@ import kotlin.math.roundToLong
  * (zero leftover paisa). Extra paisa from integer division are distributed one-per-person
  * from the first participant onwards.
  *
- * [unequalSplit] returns the remaining amount after subtracting fixed per-person amounts.
+ * [sharesSplit] divides proportionally by integer share counts using the largest-remainder
+ * method, also guaranteeing exact paisa invariant.
  */
 class CalculateSplitUseCase @Inject constructor() {
 
@@ -37,21 +38,6 @@ class CalculateSplitUseCase @Inject constructor() {
             val sharePaisa = if (index < remainderPaisa) baseSharePaisa + 1 else baseSharePaisa
             sharePaisa / 100.0
         }
-    }
-
-    /**
-     * Returns the leftover amount after subtracting [fixedAmounts] from [totalAmount].
-     *
-     * @throws IllegalArgumentException if the sum of fixed amounts exceeds [totalAmount].
-     */
-    fun unequalSplit(totalAmount: Double, fixedAmounts: Map<String, Double>): Double {
-        val totalFixed = fixedAmounts.values.fold(0.0) { acc, v -> acc + v }
-        require(totalFixed <= totalAmount + 1e-9) {
-            "Fixed amounts (%.2f) exceed total (%.2f)".format(totalFixed, totalAmount)
-        }
-        // Round the remaining amount to 2 decimal places to avoid floating-point noise.
-        val remaining = (totalAmount * 100).roundToLong() - (totalFixed * 100).roundToLong()
-        return remaining / 100.0
     }
 
     /**

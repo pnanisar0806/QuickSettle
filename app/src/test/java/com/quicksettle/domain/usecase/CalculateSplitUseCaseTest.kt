@@ -133,56 +133,6 @@ class CalculateSplitUseCaseTest {
     }
 
     // ──────────────────────────────────────────────────────────────
-    // unequalSplit
-    // ──────────────────────────────────────────────────────────────
-
-    @Test
-    fun `unequalSplit returns correct remainder`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 500.0,
-            fixedAmounts = mapOf("Alice" to 200.0, "Bob" to 150.0),
-        )
-        assertThat(remaining).isEqualTo(150.0)
-    }
-
-    @Test
-    fun `unequalSplit when fixed amounts exactly equal total remaining is zero`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 300.0,
-            fixedAmounts = mapOf("Alice" to 150.0, "Bob" to 150.0),
-        )
-        assertThat(remaining).isEqualTo(0.0)
-    }
-
-    @Test
-    fun `unequalSplit empty fixedAmounts returns full total`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 999.99,
-            fixedAmounts = emptyMap(),
-        )
-        assertThat(remaining).isEqualTo(999.99)
-    }
-
-    @Test
-    fun `unequalSplit throws when fixed amounts exceed total`() {
-        assertThrows<IllegalArgumentException> {
-            useCase.unequalSplit(
-                totalAmount = 100.0,
-                fixedAmounts = mapOf("Alice" to 60.0, "Bob" to 60.0),
-            )
-        }
-    }
-
-    @Test
-    fun `unequalSplit single fixed amount`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 1000.0,
-            fixedAmounts = mapOf("Charlie" to 350.75),
-        )
-        assertThat(remaining).isEqualTo(649.25)
-    }
-
-    // ──────────────────────────────────────────────────────────────
     // sharesSplit — exact value checks
     // ──────────────────────────────────────────────────────────────
 

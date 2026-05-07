@@ -83,7 +83,7 @@ com.quicksettle/
 
 ## Screens (4 total — see docs/designs/ for reference screenshots)
 1. **Bill Entry** (Amount tab): Description field + large ₹ amount display + custom number pad + "Add Friends" CTA
-2. **Select Friends** (Friends tab): Total bill header + Equal/Unequal toggle (Share mode PLANNED TODO) + Frequent Friends list with avatars + Suggestions section + "Go to Settle" CTA
+2. **Select Friends** (Friends tab): Total bill header + Equal/Shares toggle + "I paid for others" toggle + editable "You" row (Shares mode) + Frequent Friends list with avatars + Suggestions section + "Go to Settle" CTA
 3. **Settlement List** (Settle tab): "Total to Collect" header + active debts badge + settlement cards with Show QR / WhatsApp buttons + "Settle All Balances" CTA
 4. **Add Friend** (overlay/sheet from Friends tab): Search/name entry + Import from Contacts + Suggested Friends grid + Manual UPI ID entry + "Add to Group" CTA
 

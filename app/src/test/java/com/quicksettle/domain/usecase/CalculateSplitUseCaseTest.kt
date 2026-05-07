@@ -133,52 +133,170 @@ class CalculateSplitUseCaseTest {
     }
 
     // ──────────────────────────────────────────────────────────────
-    // unequalSplit
+    // sharesSplit — exact value checks
     // ──────────────────────────────────────────────────────────────
 
     @Test
-    fun `unequalSplit returns correct remainder`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 500.0,
-            fixedAmounts = mapOf("Alice" to 200.0, "Bob" to 150.0),
+    fun `sharesSplit equal shares exact division 4 people`() {
+        // ₹100 with each having 1 share → all 25.00
+        val result = useCase.sharesSplit(
+            totalAmount = 100.0,
+            sharesByPerson = mapOf("a" to 1, "b" to 1, "c" to 1, "d" to 1),
         )
-        assertThat(remaining).isEqualTo(150.0)
+        assertThat(result["a"]).isEqualTo(25.0)
+        assertThat(result["b"]).isEqualTo(25.0)
+        assertThat(result["c"]).isEqualTo(25.0)
+        assertThat(result["d"]).isEqualTo(25.0)
     }
 
     @Test
-    fun `unequalSplit when fixed amounts exactly equal total remaining is zero`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 300.0,
-            fixedAmounts = mapOf("Alice" to 150.0, "Bob" to 150.0),
+    fun `sharesSplit equal shares paisa leftover 3 people`() {
+        // ₹100 / 3 shares → totals 100.00; leftover paisa go by remainder rank
+        val result = useCase.sharesSplit(
+            totalAmount = 100.0,
+            sharesByPerson = mapOf("a" to 1, "b" to 1, "c" to 1),
         )
-        assertThat(remaining).isEqualTo(0.0)
+        val sumPaisa = result.values.fold(0L) { acc, v -> acc + (v * 100).roundToLong() }
+        assertThat(sumPaisa).isEqualTo(10_000L)
+        // Each person gets either 33.33 or 33.34
+        result.values.forEach { v ->
+            assertThat(v).isAnyOf(33.33, 33.34)
+        }
     }
 
     @Test
-    fun `unequalSplit empty fixedAmounts returns full total`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 999.99,
-            fixedAmounts = emptyMap(),
+    fun `sharesSplit weighted shares exact 120 by 2-1-1`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 120.0,
+            sharesByPerson = mapOf("a" to 2, "b" to 1, "c" to 1),
         )
-        assertThat(remaining).isEqualTo(999.99)
+        assertThat(result["a"]).isEqualTo(60.0)
+        assertThat(result["b"]).isEqualTo(30.0)
+        assertThat(result["c"]).isEqualTo(30.0)
     }
 
     @Test
-    fun `unequalSplit throws when fixed amounts exceed total`() {
+    fun `sharesSplit weighted shares with leftover 100 by 2-1-1`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 100.0,
+            sharesByPerson = mapOf("a" to 2, "b" to 1, "c" to 1),
+        )
+        assertThat(result["a"]).isEqualTo(50.0)
+        assertThat(result["b"]).isEqualTo(25.0)
+        assertThat(result["c"]).isEqualTo(25.0)
+    }
+
+    @Test
+    fun `sharesSplit awkward weights 3-1`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 100.0,
+            sharesByPerson = mapOf("a" to 3, "b" to 1),
+        )
+        assertThat(result["a"]).isEqualTo(75.0)
+        assertThat(result["b"]).isEqualTo(25.0)
+    }
+
+    @Test
+    fun `sharesSplit awkward weights 2-3`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 100.0,
+            sharesByPerson = mapOf("a" to 2, "b" to 3),
+        )
+        assertThat(result["a"]).isEqualTo(40.0)
+        assertThat(result["b"]).isEqualTo(60.0)
+    }
+
+    @Test
+    fun `sharesSplit hard rounding 10 by 7 ones`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 10.0,
+            sharesByPerson = mapOf("a" to 1, "b" to 1, "c" to 1, "d" to 1, "e" to 1, "f" to 1, "g" to 1),
+        )
+        val sumPaisa = result.values.fold(0L) { acc, v -> acc + (v * 100).roundToLong() }
+        assertThat(sumPaisa).isEqualTo(1_000L)
+        // Every person gets either 1.42 or 1.43
+        result.values.forEach { v -> assertThat(v).isAnyOf(1.42, 1.43) }
+    }
+
+    @Test
+    fun `sharesSplit zero share participant gets zero`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 100.0,
+            sharesByPerson = mapOf("a" to 1, "b" to 0, "c" to 1),
+        )
+        assertThat(result["a"]).isEqualTo(50.0)
+        assertThat(result["b"]).isEqualTo(0.0)
+        assertThat(result["c"]).isEqualTo(50.0)
+    }
+
+    @Test
+    fun `sharesSplit single participant takes all`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 100.0,
+            sharesByPerson = mapOf("a" to 5),
+        )
+        assertThat(result["a"]).isEqualTo(100.0)
+    }
+
+    @Test
+    fun `sharesSplit zero amount`() {
+        val result = useCase.sharesSplit(
+            totalAmount = 0.0,
+            sharesByPerson = mapOf("a" to 1, "b" to 2),
+        )
+        assertThat(result["a"]).isEqualTo(0.0)
+        assertThat(result["b"]).isEqualTo(0.0)
+    }
+
+    @Test
+    fun `sharesSplit throws when total shares is zero`() {
         assertThrows<IllegalArgumentException> {
-            useCase.unequalSplit(
+            useCase.sharesSplit(
                 totalAmount = 100.0,
-                fixedAmounts = mapOf("Alice" to 60.0, "Bob" to 60.0),
+                sharesByPerson = mapOf("a" to 0, "b" to 0),
             )
         }
     }
 
     @Test
-    fun `unequalSplit single fixed amount`() {
-        val remaining = useCase.unequalSplit(
-            totalAmount = 1000.0,
-            fixedAmounts = mapOf("Charlie" to 350.75),
-        )
-        assertThat(remaining).isEqualTo(649.25)
+    fun `sharesSplit throws when shares are negative`() {
+        assertThrows<IllegalArgumentException> {
+            useCase.sharesSplit(
+                totalAmount = 100.0,
+                sharesByPerson = mapOf("a" to -1, "b" to 2),
+            )
+        }
+    }
+
+    @Test
+    fun `sharesSplit throws when total amount is negative`() {
+        assertThrows<IllegalArgumentException> {
+            useCase.sharesSplit(
+                totalAmount = -1.0,
+                sharesByPerson = mapOf("a" to 1),
+            )
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // sharesSplit — paisa invariant property test (200 random configs)
+    // ──────────────────────────────────────────────────────────────
+
+    @Test
+    fun `sharesSplit paisa invariant holds for 200 random configurations`() {
+        val rng = Random(seed = 7L)
+        repeat(200) {
+            val amount = rng.nextDouble(from = 0.01, until = 100_000.0)
+                .let { "%.2f".format(it).toDouble() }   // snap to 2dp
+            val n = rng.nextInt(from = 2, until = 9)
+            val sharesMap = (0 until n).associate { idx ->
+                "p$idx" to rng.nextInt(from = 1, until = 10)
+            }
+            val result = useCase.sharesSplit(totalAmount = amount, sharesByPerson = sharesMap)
+
+            val expectedPaisa = (amount * 100).roundToLong()
+            val actualPaisa = result.values.fold(0L) { acc, v -> acc + (v * 100).roundToLong() }
+            assertThat(actualPaisa).isEqualTo(expectedPaisa)
+        }
     }
 }

@@ -158,36 +158,83 @@ class FriendsUiStateTest {
         }
     }
 
-    // ── computeSplit — Unequal mode ──────────────────────────────────
+    // ── computeSplit — Shares mode ──────────────────────────────────
 
     @Nested
-    inner class UnequalSplitAmounts {
+    inner class Shares {
         @Test
-        fun `unequal split returns manual amounts`() {
+        fun `computeSplit SHARES mode with includeSelf splits proportionally including owner`() {
+            // ₹100, owner 2 shares + alice 1 share + bob 1 share → owner 50, alice 25, bob 25
             val state = FriendsUiState(
-                totalAmount = 500.0,
-                splitMode = SplitMode.UNEQUAL,
+                totalAmount = 100.0,
+                splitMode = SplitMode.SHARES,
+                includeSelfInSplit = true,
+                ownerShares = 2,
                 selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 200.0),
-                    SelectedFriend(friend = bob, manualAmount = 150.0),
+                    SelectedFriend(friend = alice, shares = 1),
+                    SelectedFriend(friend = bob, shares = 1),
                 ),
             )
-            val (amounts, _) = state.split()
-            assertThat(amounts["alice-1"]).isEqualTo(200.0)
-            assertThat(amounts["bob-2"]).isEqualTo(150.0)
+            val (amounts, ownerAmt) = state.split()
+            assertThat(ownerAmt).isEqualTo(50.0)
+            assertThat(amounts["alice-1"]).isEqualTo(25.0)
+            assertThat(amounts["bob-2"]).isEqualTo(25.0)
         }
 
         @Test
-        fun `unequal split with zero amounts returns zeros`() {
+        fun `computeSplit SHARES mode without includeSelf excludes owner from divisor`() {
+            // ₹100, includeSelf = false, alice 1, bob 1 → owner 0, alice 50, bob 50
             val state = FriendsUiState(
-                totalAmount = 500.0,
-                splitMode = SplitMode.UNEQUAL,
+                totalAmount = 100.0,
+                splitMode = SplitMode.SHARES,
+                includeSelfInSplit = false,
+                ownerShares = 99, // ignored since includeSelf is false
                 selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 0.0),
+                    SelectedFriend(friend = alice, shares = 1),
+                    SelectedFriend(friend = bob, shares = 1),
                 ),
             )
-            val (amounts, _) = state.split()
+            val (amounts, ownerAmt) = state.split()
+            assertThat(ownerAmt).isEqualTo(0.0)
+            assertThat(amounts["alice-1"]).isEqualTo(50.0)
+            assertThat(amounts["bob-2"]).isEqualTo(50.0)
+        }
+
+        @Test
+        fun `computeSplit SHARES mode all zero shares returns zeros gracefully`() {
+            val state = FriendsUiState(
+                totalAmount = 100.0,
+                splitMode = SplitMode.SHARES,
+                includeSelfInSplit = true,
+                ownerShares = 0,
+                selectedFriends = listOf(
+                    SelectedFriend(friend = alice, shares = 0),
+                    SelectedFriend(friend = bob, shares = 0),
+                ),
+            )
+            val (amounts, ownerAmt) = state.split()
+            assertThat(ownerAmt).isEqualTo(0.0)
             assertThat(amounts["alice-1"]).isEqualTo(0.0)
+            assertThat(amounts["bob-2"]).isEqualTo(0.0)
+        }
+
+        @Test
+        fun `computeSplit SHARES mode paisa-safe with awkward shares`() {
+            // ₹100 total, includeSelf = true with 1 share, alice 1 share, bob 1 share = 3 shares
+            // 10000 paisa / 3 = 3333 base + 1 leftover paisa
+            val state = FriendsUiState(
+                totalAmount = 100.0,
+                splitMode = SplitMode.SHARES,
+                includeSelfInSplit = true,
+                ownerShares = 1,
+                selectedFriends = listOf(
+                    SelectedFriend(friend = alice, shares = 1),
+                    SelectedFriend(friend = bob, shares = 1),
+                ),
+            )
+            val (amounts, ownerAmt) = state.split()
+            val sumPaisa = ((ownerAmt + amounts.values.sum()) * 100).roundToLong()
+            assertThat(sumPaisa).isEqualTo(10_000L)
         }
     }
 
@@ -226,116 +273,6 @@ class FriendsUiStateTest {
             val (_, ownerAmt) = state.split()
             assertThat(ownerAmt).isEqualTo(0.0)
         }
-
-        @Test
-        fun `owner amount in unequal mode is remainder`() {
-            val state = FriendsUiState(
-                totalAmount = 500.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 200.0),
-                    SelectedFriend(friend = bob, manualAmount = 150.0),
-                ),
-            )
-            val (_, ownerAmt) = state.split()
-            // 500 - 200 - 150 = 150
-            assertThat(ownerAmt).isEqualTo(150.0)
-        }
-
-        @Test
-        fun `owner amount in unequal when friends total equals bill`() {
-            val state = FriendsUiState(
-                totalAmount = 300.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 150.0),
-                    SelectedFriend(friend = bob, manualAmount = 150.0),
-                ),
-            )
-            val (_, ownerAmt) = state.split()
-            assertThat(ownerAmt).isEqualTo(0.0)
-        }
-
-        @Test
-        fun `owner amount negative when friends exceed total`() {
-            val state = FriendsUiState(
-                totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 80.0),
-                    SelectedFriend(friend = bob, manualAmount = 50.0),
-                ),
-            )
-            val (_, ownerAmt) = state.split()
-            // 100 - 130 = -30
-            assertThat(ownerAmt).isEqualTo(-30.0)
-        }
-    }
-
-    // ── isUnequalOverBudget ──────────────────────────────────────────
-
-    @Nested
-    inner class OverBudget {
-        @Test
-        fun `not over budget in equal mode`() {
-            val state = FriendsUiState(
-                totalAmount = 100.0,
-                splitMode = SplitMode.EQUAL,
-                selectedFriends = listOf(SelectedFriend(friend = alice)),
-            )
-            assertThat(state.isUnequalOverBudget).isFalse()
-        }
-
-        @Test
-        fun `not over budget when within total`() {
-            val state = FriendsUiState(
-                totalAmount = 500.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 200.0),
-                    SelectedFriend(friend = bob, manualAmount = 200.0),
-                ),
-            )
-            assertThat(state.isUnequalOverBudget).isFalse()
-        }
-
-        @Test
-        fun `over budget when amounts exceed total`() {
-            val state = FriendsUiState(
-                totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 60.0),
-                    SelectedFriend(friend = bob, manualAmount = 60.0),
-                ),
-            )
-            assertThat(state.isUnequalOverBudget).isTrue()
-        }
-
-        @Test
-        fun `not over budget when amounts exactly equal total`() {
-            val state = FriendsUiState(
-                totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 50.0),
-                    SelectedFriend(friend = bob, manualAmount = 50.0),
-                ),
-            )
-            assertThat(state.isUnequalOverBudget).isFalse()
-        }
-
-        @Test
-        fun `over budget by 1 paisa`() {
-            val state = FriendsUiState(
-                totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 100.01),
-                ),
-            )
-            assertThat(state.isUnequalOverBudget).isTrue()
-        }
     }
 
     // ── canProceed ───────────────────────────────────────────────────
@@ -343,87 +280,84 @@ class FriendsUiStateTest {
     @Nested
     inner class CanProceed {
         @Test
-        fun `cannot proceed with no friends`() {
-            val state = FriendsUiState(totalAmount = 100.0, selectedFriends = emptyList())
+        fun `canProceed false when no friends selected`() {
+            val state = FriendsUiState(totalAmount = 100.0, splitMode = SplitMode.SHARES)
             assertThat(state.canProceed).isFalse()
         }
 
         @Test
-        fun `cannot proceed with zero total`() {
+        fun `canProceed false when totalAmount is zero`() {
             val state = FriendsUiState(
                 totalAmount = 0.0,
-                selectedFriends = listOf(SelectedFriend(friend = alice)),
+                splitMode = SplitMode.SHARES,
+                selectedFriends = listOf(SelectedFriend(friend = alice, shares = 1)),
             )
             assertThat(state.canProceed).isFalse()
         }
 
         @Test
-        fun `can proceed in equal mode with friends and amount`() {
+        fun `canProceed false in SHARES mode when all shares zero`() {
             val state = FriendsUiState(
                 totalAmount = 100.0,
-                splitMode = SplitMode.EQUAL,
-                selectedFriends = listOf(SelectedFriend(friend = alice)),
-            )
-            assertThat(state.canProceed).isTrue()
-        }
-
-        @Test
-        fun `cannot proceed in unequal mode when no amounts assigned`() {
-            val state = FriendsUiState(
-                totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
+                splitMode = SplitMode.SHARES,
+                includeSelfInSplit = true,
+                ownerShares = 0,
                 selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 0.0),
+                    SelectedFriend(friend = alice, shares = 0),
+                    SelectedFriend(friend = bob, shares = 0),
                 ),
             )
             assertThat(state.canProceed).isFalse()
         }
 
         @Test
-        fun `can proceed in unequal mode when amounts within total`() {
+        fun `canProceed true in SHARES mode when at least one share is positive`() {
             val state = FriendsUiState(
                 totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
+                splitMode = SplitMode.SHARES,
+                includeSelfInSplit = true,
+                ownerShares = 0,
                 selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 50.0),
+                    SelectedFriend(friend = alice, shares = 1),
                 ),
             )
             assertThat(state.canProceed).isTrue()
         }
 
         @Test
-        fun `cannot proceed in unequal mode when amounts exceed total`() {
+        fun `canProceed true in SHARES mode when only owner has shares`() {
             val state = FriendsUiState(
                 totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
+                splitMode = SplitMode.SHARES,
+                includeSelfInSplit = true,
+                ownerShares = 2,
                 selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 60.0),
-                    SelectedFriend(friend = bob, manualAmount = 60.0),
-                ),
-            )
-            assertThat(state.canProceed).isFalse()
-        }
-
-        @Test
-        fun `can proceed in unequal mode when amounts exactly equal total`() {
-            val state = FriendsUiState(
-                totalAmount = 100.0,
-                splitMode = SplitMode.UNEQUAL,
-                selectedFriends = listOf(
-                    SelectedFriend(friend = alice, manualAmount = 50.0),
-                    SelectedFriend(friend = bob, manualAmount = 50.0),
+                    SelectedFriend(friend = alice, shares = 0),
                 ),
             )
             assertThat(state.canProceed).isTrue()
         }
 
         @Test
-        fun `can proceed in equal mode with self excluded`() {
+        fun `canProceed false in SHARES mode when only owner has shares but includeSelf is off`() {
             val state = FriendsUiState(
                 totalAmount = 100.0,
-                splitMode = SplitMode.EQUAL,
+                splitMode = SplitMode.SHARES,
                 includeSelfInSplit = false,
-                selectedFriends = listOf(SelectedFriend(friend = alice)),
+                ownerShares = 2,
+                selectedFriends = listOf(
+                    SelectedFriend(friend = alice, shares = 0),
+                ),
+            )
+            assertThat(state.canProceed).isFalse()
+        }
+
+        @Test
+        fun `canProceed true in EQUAL mode regardless of shares`() {
+            val state = FriendsUiState(
+                totalAmount = 100.0,
+                splitMode = SplitMode.EQUAL,
+                selectedFriends = listOf(SelectedFriend(friend = alice, shares = 0)),
             )
             assertThat(state.canProceed).isTrue()
         }

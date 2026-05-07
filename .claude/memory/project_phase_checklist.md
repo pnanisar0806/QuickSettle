@@ -51,6 +51,7 @@ type: project
 - [x] FriendsViewModel — full state, toggleFriend, toggleSplitMode, setManualAmount, addFriend variants
 - [x] FriendChip component — avatar initial circle, name label, selected state with primary_fixed bg
 - [x] Unequal mode — editable BasicTextField with KeyboardType.Decimal, wired to setManualAmount()
+- [x] Share mode (replaces Unequal) — integer share counts per participant, paisa-safe largest-remainder split, "I paid for others" applies in both modes (verified 2026-05-07)
 
 ### Phase 5 — Settle Screen: COMPLETE (verified 2026-04-14)
 - [x] SettleViewModel — state management with settlements, toggleQr, markPaid, settleAllMessage

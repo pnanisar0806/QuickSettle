@@ -26,7 +26,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.East
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Icon
@@ -46,7 +46,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -105,23 +104,25 @@ fun CrewScreen(
                 )
             }
 
-            // ── Equal mode: "Paid for others" toggle ────────────────────────────
-            if (uiState.splitMode == SplitMode.EQUAL) {
-                item {
-                    PaidForOthersToggle(
-                        includeSelf = uiState.includeSelfInSplit,
-                        onToggle = viewModel::toggleIncludeSelf,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
-                    )
-                }
+            // ── "Paid for others" toggle (both modes) ───────────────────────────
+            item {
+                PaidForOthersToggle(
+                    includeSelf = uiState.includeSelfInSplit,
+                    onToggle = viewModel::toggleIncludeSelf,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                )
             }
 
-            // ── Unequal mode: "You" card (shows auto-calculated remainder) ─────
-            if (uiState.splitMode == SplitMode.UNEQUAL && uiState.selectedFriends.isNotEmpty()) {
+            // ── Shares mode: editable "You" row (only when included in split) ──
+            if (uiState.splitMode == SplitMode.SHARES &&
+                uiState.includeSelfInSplit &&
+                uiState.selectedFriends.isNotEmpty()
+            ) {
                 item {
                     OwnerCard(
                         selfAmount = ownerAmt,
-                        isOverBudget = uiState.isUnequalOverBudget,
+                        ownerShares = uiState.ownerShares,
+                        onOwnerSharesChange = viewModel::setOwnerShares,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
                     )
                 }
@@ -172,9 +173,9 @@ fun CrewScreen(
                         isSelected = isSelected,
                         amount = friendAmount,
                         splitMode = uiState.splitMode,
-                        manualAmount = uiState.selectedFriends
-                            .find { it.friend.id == friend.id }?.manualAmount ?: 0.0,
-                        onManualAmountChange = { viewModel.setManualAmount(friend.id, it) },
+                        shares = uiState.selectedFriends
+                            .find { it.friend.id == friend.id }?.shares ?: 0,
+                        onSharesChange = { viewModel.setShares(friend.id, it) },
                         onClick = { viewModel.toggleFriend(friend.id) },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
                     )
@@ -330,21 +331,21 @@ private fun SplitModeToggle(
                 modifier = Modifier.weight(1f),
             )
 
-            // Unequal
+            // Shares
             ToggleOption(
-                label = "Unequal",
+                label = "Shares",
                 icon = {
                     Icon(
-                        imageVector = Icons.Filled.DragHandle,
+                        imageVector = Icons.Filled.PieChart,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = if (splitMode == SplitMode.UNEQUAL)
+                        tint = if (splitMode == SplitMode.SHARES)
                             MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
-                selected = splitMode == SplitMode.UNEQUAL,
-                onClick = { if (splitMode != SplitMode.UNEQUAL) onToggle() },
+                selected = splitMode == SplitMode.SHARES,
+                onClick = { if (splitMode != SplitMode.SHARES) onToggle() },
                 modifier = Modifier.weight(1f),
             )
         }
@@ -470,18 +471,15 @@ private fun PaidForOthersToggle(
     }
 }
 
-// ── Owner "You" Card (Unequal Mode — read-only, shows remainder) ────────────
+// ── Owner "You" Row (Shares Mode — editable share count, live amount) ───────
 
 @Composable
 private fun OwnerCard(
     selfAmount: Double,
-    isOverBudget: Boolean,
+    ownerShares: Int,
+    onOwnerSharesChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val amountColor = if (isOverBudget) MaterialTheme.colorScheme.error
-    else MaterialTheme.colorScheme.onSurface
-    val subtitle = if (isOverBudget) "Friends' amounts exceed total" else "Your share"
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -513,7 +511,6 @@ private fun OwnerCard(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // "You" avatar
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -533,7 +530,6 @@ private fun OwnerCard(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Name + subtitle
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "You",
@@ -544,23 +540,18 @@ private fun OwnerCard(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = subtitle,
+                    text = "₹${formatAmount(selfAmount)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isOverBudget) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Read-only amount display
-            Text(
-                text = "₹${formatAmount(selfAmount)}",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontFamily = ManropeBold,
-                    fontWeight = FontWeight.Bold,
-                ),
-                color = amountColor,
+            // Editable share count
+            SharesField(
+                shares = ownerShares,
+                onSharesChange = onOwnerSharesChange,
             )
         }
     }
@@ -606,8 +597,8 @@ private fun FriendCard(
     isSelected: Boolean,
     amount: Double?,
     splitMode: SplitMode,
-    manualAmount: Double,
-    onManualAmountChange: (Double) -> Unit,
+    shares: Int,
+    onSharesChange: (Int) -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -676,61 +667,22 @@ private fun FriendCard(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Amount + selection indicator
+            // Right side: in SHARES mode show shares input + live amount; in EQUAL mode show amount only
             Column(horizontalAlignment = Alignment.End) {
-                if (isSelected && splitMode == SplitMode.UNEQUAL) {
-                    // Editable amount field for unequal mode
-                    var textValue by remember(friend.id) {
-                        mutableStateOf(
-                            if (manualAmount == 0.0) "" else manualAmount.toBigDecimal().stripTrailingZeros().toPlainString()
-                        )
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "₹",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontFamily = ManropeBold,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        BasicTextField(
-                            value = textValue,
-                            onValueChange = { newValue ->
-                                // Allow digits and single decimal, max 2 decimal places
-                                val filtered = newValue.filter { it.isDigit() || it == '.' }
-                                val parts = filtered.split(".")
-                                val valid = when {
-                                    parts.size > 2 -> false
-                                    parts.size == 2 && parts[1].length > 2 -> false
-                                    else -> true
-                                }
-                                if (valid) {
-                                    textValue = filtered
-                                    val parsed = filtered.toDoubleOrNull() ?: 0.0
-                                    onManualAmountChange(parsed)
-                                }
-                            },
-                            modifier = Modifier
-                                .width(80.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                                    shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(horizontal = 8.dp, vertical = 6.dp),
-                            textStyle = TextStyle(
-                                fontFamily = ManropeBold,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.End,
-                            ),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Decimal,
-                            ),
-                        )
-                    }
+                if (isSelected && splitMode == SplitMode.SHARES) {
+                    SharesField(
+                        shares = shares,
+                        onSharesChange = onSharesChange,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "₹${formatAmount(amount ?: 0.0)}",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = ManropeBold,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 } else if (isSelected && amount != null) {
                     Text(
                         text = "₹${formatAmount(amount)}",
@@ -749,16 +701,14 @@ private fun FriendCard(
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(24.dp)
-                            .background(
-                                color = Color(0xFF2C694E),
-                                shape = CircleShape,
-                            ),
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .background(Primary),
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = "Selected",
-                            tint = Color.White,
+                            tint = OnPrimary,
                             modifier = Modifier.size(14.dp),
                         )
                     }
@@ -919,6 +869,71 @@ private fun GlassmorphismCtaBar(
             enabled = enabled,
             onClick = onGoToSettle,
             modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+// ── Shares Input (integer-only, 0..99) ───────────────────────────────────────
+
+@Composable
+private fun SharesField(
+    shares: Int,
+    onSharesChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var textValue by remember(shares) {
+        mutableStateOf(if (shares == 0) "" else shares.toString())
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        BasicTextField(
+            value = textValue,
+            onValueChange = { newValue ->
+                val digitsOnly = newValue.filter { it.isDigit() }.take(2) // max 2 digits → 99
+                val parsed = digitsOnly.toIntOrNull() ?: 0
+                val clamped = parsed.coerceIn(0, 99)
+                textValue = if (clamped == 0) digitsOnly else clamped.toString()
+                onSharesChange(clamped)
+            },
+            modifier = modifier
+                .width(56.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    shape = RoundedCornerShape(8.dp),
+                )
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            textStyle = TextStyle(
+                fontFamily = ManropeBold,
+                fontWeight = FontWeight.Bold,
+                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+            ),
+            decorationBox = { innerTextField ->
+                if (textValue.isEmpty()) {
+                    Text(
+                        text = "0",
+                        style = TextStyle(
+                            fontFamily = ManropeBold,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                innerTextField()
+            },
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = "shares",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

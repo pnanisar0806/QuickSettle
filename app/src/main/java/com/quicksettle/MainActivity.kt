@@ -30,7 +30,6 @@ import com.quicksettle.presentation.navigation.NavGraph
 import com.quicksettle.presentation.navigation.Screen
 import com.quicksettle.presentation.navigation.bottomNavItems
 import com.quicksettle.presentation.theme.ManropeBold
-import com.quicksettle.presentation.theme.PrimaryFixed
 import com.quicksettle.presentation.theme.SovereignLedgerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -118,9 +117,9 @@ class MainActivity : ComponentActivity() {
                                             )
                                         },
                                         colors = NavigationBarItemDefaults.colors(
-                                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                                            indicatorColor = PrimaryFixed,
+                                            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
                                             unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                             unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                         ),

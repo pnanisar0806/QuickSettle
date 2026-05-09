@@ -118,7 +118,7 @@ class CalculateSplitUseCaseTest {
         val rng = Random(seed = 42L)
         repeat(200) { iteration ->
             val amount = rng.nextDouble(from = 0.01, until = 100_000.0)
-                .let { "%.2f".format(it).toDouble() }   // snap to 2 dp
+                .let { "%.2f".format(it).toDouble() } // snap to 2 dp
             val people = rng.nextInt(from = 1, until = 51)
 
             val splits = useCase.equalSplit(totalAmount = amount, numberOfPeople = people)
@@ -287,7 +287,7 @@ class CalculateSplitUseCaseTest {
         val rng = Random(seed = 7L)
         repeat(200) {
             val amount = rng.nextDouble(from = 0.01, until = 100_000.0)
-                .let { "%.2f".format(it).toDouble() }   // snap to 2dp
+                .let { "%.2f".format(it).toDouble() } // snap to 2dp
             val n = rng.nextInt(from = 2, until = 9)
             val sharesMap = (0 until n).associate { idx ->
                 "p$idx" to rng.nextInt(from = 1, until = 10)

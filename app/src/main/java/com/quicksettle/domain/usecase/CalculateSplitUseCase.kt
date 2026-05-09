@@ -80,7 +80,7 @@ class CalculateSplitUseCase @Inject constructor() {
 
         // Rank by remainder DESC, ties broken by original index ASC. Take the top N to get +1 paisa each.
         val ranked = allocations.sortedWith(
-            compareByDescending<Allocation> { it.remainder }.thenBy { it.index }
+            compareByDescending<Allocation> { it.remainder }.thenBy { it.index },
         )
         for (i in 0 until leftoverPaisa.toInt()) {
             ranked[i].basePaisa += 1

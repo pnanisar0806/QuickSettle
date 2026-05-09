@@ -22,7 +22,7 @@ val OnTertiaryContainer = Color(0xFF75DAA8)
 
 // ── Surface Hierarchy ─────────────────────────────────────────────────────────
 val Surface = Color(0xFFF9F9F8)
-val OnSurface = Color(0xFF191C1C)          // NEVER use pure black
+val OnSurface = Color(0xFF191C1C) // NEVER use pure black
 val OnSurfaceVariant = Color(0xFF414844)
 val SurfaceContainerLowest = Color(0xFFFFFFFF)
 val SurfaceContainerLow = Color(0xFFF3F4F3)
@@ -31,16 +31,16 @@ val SurfaceContainerHigh = Color(0xFFE7E8E7)
 val SurfaceContainerHighest = Color(0xFFE1E3E2)
 
 // ── Fixed / Status ────────────────────────────────────────────────────────────
-val PrimaryFixed = Color(0xFFC1ECD4)       // highlight backgrounds
-val TertiaryFixedDim = Color(0xFF75DAA8)   // "Paid" status chips
-val ErrorContainer = Color(0xFFFFDAD6)     // "Owed" status chips
+val PrimaryFixed = Color(0xFFC1ECD4) // highlight backgrounds
+val TertiaryFixedDim = Color(0xFF75DAA8) // "Paid" status chips
+val ErrorContainer = Color(0xFFFFDAD6) // "Owed" status chips
 val OnErrorContainer = Color(0xFF410002)
 val Error = Color(0xFFBA1A1A)
 val OnError = Color(0xFFFFFFFF)
 
 // ── Outline ───────────────────────────────────────────────────────────────────
 val Outline = Color(0xFF6F7872)
-val OutlineVariant = Color(0xFFC1C8C2)     // ghost-border at ≤15 % opacity
+val OutlineVariant = Color(0xFFC1C8C2) // ghost-border at ≤15 % opacity
 
 // ── Inverse ───────────────────────────────────────────────────────────────────
 val InverseSurface = Color(0xFF2D3131)

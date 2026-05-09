@@ -105,8 +105,11 @@ class MainActivity : ComponentActivity() {
                                         },
                                         icon = {
                                             Icon(
-                                                imageVector = if (selected) item.selectedIcon
-                                                else item.unselectedIcon,
+                                                imageVector = if (selected) {
+                                                    item.selectedIcon
+                                                } else {
+                                                    item.unselectedIcon
+                                                },
                                                 contentDescription = item.label,
                                             )
                                         },

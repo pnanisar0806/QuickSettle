@@ -32,7 +32,7 @@ class EntryViewModel @Inject constructor(
         EntryUiState(
             showOnboarding = !userProfile.isProfileSetup(),
             displayName = userProfile.getDisplayName() ?: "",
-        )
+        ),
     )
     val uiState: StateFlow<EntryUiState> = _uiState.asStateFlow()
 
@@ -75,7 +75,6 @@ class EntryViewModel @Inject constructor(
             )
         }
     }
-
 }
 
 /** Testable amount input rules — extracted from EntryViewModel for direct unit testing. */

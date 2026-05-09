@@ -17,8 +17,7 @@ class FakeUserProfile(
 
     override fun getUpiId(): String? = upiId
 
-    override fun isProfileSetup(): Boolean =
-        !displayName.isNullOrBlank() && !upiId.isNullOrBlank()
+    override fun isProfileSetup(): Boolean = !displayName.isNullOrBlank() && !upiId.isNullOrBlank()
 
     override fun saveProfile(name: String, upiId: String) {
         this.displayName = name

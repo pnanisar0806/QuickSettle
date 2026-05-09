@@ -17,12 +17,11 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(
-            context = context,
-            klass = AppDatabase::class.java,
-            name = "quicksettle.db",
-        ).fallbackToDestructiveMigration().build()
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase = Room.databaseBuilder(
+        context = context,
+        klass = AppDatabase::class.java,
+        name = "quicksettle.db",
+    ).fallbackToDestructiveMigration().build()
 
     @Provides
     fun provideFriendDao(database: AppDatabase): FriendDao = database.friendDao()

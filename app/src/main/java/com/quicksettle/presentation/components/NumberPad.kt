@@ -100,8 +100,11 @@ private fun NumberPadKey(
         animationSpec = tween(durationMillis = 80),
         label = "key-scale",
     )
-    val backgroundColor = if (pressed) MaterialTheme.colorScheme.surfaceContainerHighest
-        else MaterialTheme.colorScheme.surfaceContainerHigh
+    val backgroundColor = if (pressed) {
+        MaterialTheme.colorScheme.surfaceContainerHighest
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
 
     val semanticDesc = when (padKey) {
         is PadKey.Digit -> padKey.value.toString()

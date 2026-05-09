@@ -167,7 +167,7 @@ class GenerateUpiLinkUseCaseTest {
             upiLink = link,
         )
         assertThat(message).isEqualTo(
-            "Hey Rahul, your share for Dinner is ₹250.00. Pay here: $link"
+            "Hey Rahul, your share for Dinner is ₹250.00. Pay here: $link",
         )
     }
 

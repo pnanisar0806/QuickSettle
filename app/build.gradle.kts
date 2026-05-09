@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.spotless)
 }
 
 android {
@@ -24,7 +25,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -51,6 +52,28 @@ android {
         }
     }
 }
+
+spotless {
+    kotlin {
+        target("src/**/*.kt")
+        ktlint("1.5.0")
+            .editorConfigOverride(
+                mapOf("ktlint_function_naming_ignore_when_annotated_with" to "Composable"),
+            )
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint("1.5.0")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+// Keep CLAUDE.md command aliases working
+tasks.register("ktlintCheck") { dependsOn("spotlessCheck") }
+tasks.register("ktlintFormat") { dependsOn("spotlessApply") }
 
 dependencies {
     // Core

@@ -99,7 +99,7 @@ fun NavGraph(
             // Forward split data whenever friends state changes
             LaunchedEffect(friendsState.selectedFriends, friendsState.splitMode, friendsState.includeSelfInSplit) {
                 val (amounts, _) = friendsState.computeSplit(
-                    com.quicksettle.domain.usecase.CalculateSplitUseCase()
+                    com.quicksettle.domain.usecase.CalculateSplitUseCase(),
                 )
                 val description = entryState.description.ifBlank { "Bill Split" }
                 val splits = friendsState.selectedFriends

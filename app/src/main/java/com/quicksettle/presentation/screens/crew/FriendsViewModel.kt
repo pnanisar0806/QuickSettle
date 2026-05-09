@@ -120,8 +120,7 @@ class FriendsViewModel @Inject constructor(
      * Computes the current split. Called from the Composable to get amounts
      * without exposing the use case to the UI layer.
      */
-    fun currentSplit(): Pair<Map<String, Double>, Double> =
-        _uiState.value.computeSplit(calculateSplitUseCase)
+    fun currentSplit(): Pair<Map<String, Double>, Double> = _uiState.value.computeSplit(calculateSplitUseCase)
 
     init {
         viewModelScope.launch {
@@ -129,8 +128,12 @@ class FriendsViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         frequentFriends = friends,
-                        filteredFriends = if (state.searchQuery.isBlank()) friends else friends.filter {
-                            it.name.contains(state.searchQuery, ignoreCase = true)
+                        filteredFriends = if (state.searchQuery.isBlank()) {
+                            friends
+                        } else {
+                            friends.filter {
+                                it.name.contains(state.searchQuery, ignoreCase = true)
+                            }
                         },
                     )
                 }
@@ -199,8 +202,12 @@ class FriendsViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(
                 searchQuery = query,
-                filteredFriends = if (query.isBlank()) state.frequentFriends else state.frequentFriends.filter {
-                    it.name.contains(query, ignoreCase = true)
+                filteredFriends = if (query.isBlank()) {
+                    state.frequentFriends
+                } else {
+                    state.frequentFriends.filter {
+                        it.name.contains(query, ignoreCase = true)
+                    }
                 },
             )
         }

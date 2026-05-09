@@ -63,8 +63,7 @@ class UserProfileStore @Inject constructor(@ApplicationContext context: Context)
     /**
      * Returns true only when both a non-blank name and a non-blank UPI ID have been saved.
      */
-    override fun isProfileSetup(): Boolean =
-        !getDisplayName().isNullOrBlank() && !getUpiId().isNullOrBlank()
+    override fun isProfileSetup(): Boolean = !getDisplayName().isNullOrBlank() && !getUpiId().isNullOrBlank()
 
     /** Removes all stored profile data. */
     override fun clearProfile() {

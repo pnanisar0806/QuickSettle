@@ -17,7 +17,11 @@ import javax.inject.Inject
 // ── Status Enum ───────────────────────────────────────────────────────────────
 
 enum class SettlementStatus {
-    PENDING, URGENT, DUE_TODAY, PAID;
+    PENDING,
+    URGENT,
+    DUE_TODAY,
+    PAID,
+    ;
 
     fun displayText(pendingDays: Int = 0): String = when (this) {
         PENDING -> "PENDING ${pendingDays}D"
@@ -204,8 +208,7 @@ class SettleViewModel @Inject constructor(
      * Returns a single combined message from all non-PAID settlement share messages,
      * joined by two newlines.
      */
-    fun settleAllMessage(): String =
-        _uiState.value.settlements
-            .filter { it.status != SettlementStatus.PAID }
-            .joinToString(separator = "\n\n") { it.shareMessage }
+    fun settleAllMessage(): String = _uiState.value.settlements
+        .filter { it.status != SettlementStatus.PAID }
+        .joinToString(separator = "\n\n") { it.shareMessage }
 }

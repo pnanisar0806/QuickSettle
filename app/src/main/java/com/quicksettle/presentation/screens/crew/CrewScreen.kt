@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,9 +25,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material.icons.filled.East
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -57,13 +56,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quicksettle.domain.model.Friend
 import com.quicksettle.presentation.components.GradientButton
-import com.quicksettle.presentation.util.AmountFormatter
 import com.quicksettle.presentation.theme.ManropeBold
 import com.quicksettle.presentation.theme.ManropeExtraBold
 import com.quicksettle.presentation.theme.OnPrimary
 import com.quicksettle.presentation.theme.Primary
 import com.quicksettle.presentation.theme.PrimaryContainer
 import com.quicksettle.presentation.theme.PrimaryFixed
+import com.quicksettle.presentation.util.AmountFormatter
 
 /**
  * Select Friends screen — Friends tab.
@@ -141,8 +140,11 @@ fun CrewScreen(
                             .fillMaxWidth(),
                     ) {
                         Text(
-                            text = if (uiState.includeSelfInSplit) "Your share: ₹${formatAmount(yourShare)}"
-                            else "You pay ₹0 — splitting among friends only",
+                            text = if (uiState.includeSelfInSplit) {
+                                "Your share: ₹${formatAmount(yourShare)}"
+                            } else {
+                                "You pay ₹0 — splitting among friends only"
+                            },
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontFamily = ManropeBold,
                                 fontWeight = FontWeight.Bold,
@@ -272,7 +274,7 @@ private fun CrewHeader(
                         colors = listOf(Primary, PrimaryContainer),
                         start = Offset(0f, Float.POSITIVE_INFINITY),
                         end = Offset(Float.POSITIVE_INFINITY, 0f),
-                    )
+                    ),
                 )
                 .clickable(onClick = onAddFriend)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
@@ -322,9 +324,11 @@ private fun SplitModeToggle(
                     Text(
                         text = "=",
                         style = MaterialTheme.typography.titleMedium,
-                        color = if (splitMode == SplitMode.EQUAL)
+                        color = if (splitMode == SplitMode.EQUAL) {
                             MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     )
                 },
                 selected = splitMode == SplitMode.EQUAL,
@@ -340,9 +344,11 @@ private fun SplitModeToggle(
                         imageVector = Icons.Filled.PieChart,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = if (splitMode == SplitMode.SHARES)
+                        tint = if (splitMode == SplitMode.SHARES) {
                             MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     )
                 },
                 selected = splitMode == SplitMode.SHARES,
@@ -362,14 +368,20 @@ private fun ToggleOption(
     modifier: Modifier = Modifier,
 ) {
     val bgColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.surfaceContainerLowest
-        else Color.Transparent,
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.surfaceContainerLowest
+        } else {
+            Color.Transparent
+        },
         animationSpec = tween(200),
         label = "toggleBg",
     )
     val textColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.onSurface
-        else MaterialTheme.colorScheme.onSurfaceVariant,
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
         animationSpec = tween(200),
         label = "toggleText",
     )
@@ -380,12 +392,16 @@ private fun ToggleOption(
             .clip(RoundedCornerShape(12.dp))
             .background(bgColor)
             .then(
-                if (selected) Modifier.shadow(
-                    elevation = 2.dp,
-                    shape = RoundedCornerShape(12.dp),
-                    ambientColor = Color(0x0F002114),
-                    spotColor = Color(0x0F002114),
-                ) else Modifier
+                if (selected) {
+                    Modifier.shadow(
+                        elevation = 2.dp,
+                        shape = RoundedCornerShape(12.dp),
+                        ambientColor = Color(0x0F002114),
+                        spotColor = Color(0x0F002114),
+                    )
+                } else {
+                    Modifier
+                },
             )
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp, horizontal = 12.dp),
@@ -449,13 +465,19 @@ private fun PaidForOthersToggle(
                     .size(28.dp)
                     .border(
                         width = 2.dp,
-                        color = if (!includeSelf) Color(0xFF2C694E)
-                        else MaterialTheme.colorScheme.outlineVariant,
+                        color = if (!includeSelf) {
+                            Color(0xFF2C694E)
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant
+                        },
                         shape = CircleShape,
                     )
                     .background(
-                        color = if (!includeSelf) Color(0xFF2C694E)
-                        else Color.Transparent,
+                        color = if (!includeSelf) {
+                            Color(0xFF2C694E)
+                        } else {
+                            Color.Transparent
+                        },
                         shape = CircleShape,
                     ),
             ) {

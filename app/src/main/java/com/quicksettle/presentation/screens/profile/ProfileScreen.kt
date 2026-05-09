@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,7 +46,6 @@ import com.quicksettle.presentation.theme.Primary
 import com.quicksettle.presentation.theme.PrimaryContainer
 import com.quicksettle.presentation.theme.PrimaryFixed
 import com.quicksettle.presentation.theme.SurfaceContainerLowest
-import com.quicksettle.presentation.theme.TertiaryFixedDim
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.East
 import androidx.compose.material.icons.filled.QrCode2
@@ -41,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,13 +50,6 @@ import com.quicksettle.presentation.components.QrCodeImage
 import com.quicksettle.presentation.screens.crew.FriendAvatar
 import com.quicksettle.presentation.theme.ManropeBold
 import com.quicksettle.presentation.theme.ManropeExtraBold
-import com.quicksettle.presentation.theme.OnSecondaryContainer
-import com.quicksettle.presentation.theme.OnSurface
-import com.quicksettle.presentation.theme.OnSurfaceVariant
-import com.quicksettle.presentation.theme.PrimaryFixed
-import com.quicksettle.presentation.theme.SecondaryContainer
-import com.quicksettle.presentation.theme.SurfaceContainerHigh
-import com.quicksettle.presentation.theme.SurfaceContainerLowest
 import com.quicksettle.presentation.util.AmountFormatter
 
 /**
@@ -110,7 +101,7 @@ fun SettleScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(Color(0xCCFFFFFF))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
                 .padding(horizontal = 20.dp, vertical = 16.dp),
         ) {
             GradientButton(
@@ -148,7 +139,7 @@ private fun TotalToCollectHeader(
                 fontFamily = ManropeBold,
                 letterSpacing = 2.sp,
             ),
-            color = OnSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -158,7 +149,7 @@ private fun TotalToCollectHeader(
             style = MaterialTheme.typography.displayLarge.copy(
                 fontFamily = ManropeExtraBold,
             ),
-            color = OnSurface,
+            color = MaterialTheme.colorScheme.onSurface,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -167,7 +158,7 @@ private fun TotalToCollectHeader(
         val debtLabel = if (activeDebtsCount == 1) "DEBT" else "DEBTS"
         Surface(
             shape = RoundedCornerShape(20.dp),
-            color = SecondaryContainer,
+            color = MaterialTheme.colorScheme.secondaryContainer,
         ) {
             Text(
                 text = "\u26A1 $activeDebtsCount ACTIVE $debtLabel",
@@ -175,7 +166,7 @@ private fun TotalToCollectHeader(
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.sp,
                 ),
-                color = OnSecondaryContainer,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
             )
         }
@@ -203,7 +194,7 @@ private fun SettlementCard(
                 spotColor = Color(0x0F002114),
             )
             .clip(RoundedCornerShape(16.dp))
-            .background(SurfaceContainerLowest)
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .padding(16.dp),
     ) {
         // ── Top row: avatar + info + amount ──────────────────────────────
@@ -226,13 +217,13 @@ private fun SettlementCard(
                         fontFamily = ManropeBold,
                         fontSize = 18.sp,
                     ),
-                    color = OnSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = item.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = OnSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -246,7 +237,7 @@ private fun SettlementCard(
                         fontFamily = ManropeBold,
                         fontSize = 18.sp,
                     ),
-                    color = OnSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
@@ -258,7 +249,11 @@ private fun SettlementCard(
                             FontWeight.Normal
                         },
                     ),
-                    color = item.status.badgeColor(),
+                    color = when (item.status) {
+                        SettlementStatus.URGENT -> MaterialTheme.colorScheme.error
+                        SettlementStatus.PAID -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                 )
             }
         }
@@ -274,7 +269,7 @@ private fun SettlementCard(
                 // Show QR button
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = SurfaceContainerHigh,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     modifier = Modifier
                         .weight(1f)
                         .clickable { onToggleQr() },
@@ -300,7 +295,7 @@ private fun SettlementCard(
                 // WhatsApp button
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = SecondaryContainer,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
                     modifier = Modifier
                         .weight(1f)
                         .clickable { onShareWhatsApp(item.shareMessage) },
@@ -314,13 +309,13 @@ private fun SettlementCard(
                             imageVector = Icons.Filled.Share,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
-                            tint = OnSecondaryContainer,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "WhatsApp",
                             style = MaterialTheme.typography.labelMedium,
-                            color = OnSecondaryContainer,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     }
                 }
@@ -329,7 +324,7 @@ private fun SettlementCard(
             // Paid: settled indicator
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = PrimaryFixed,
+                color = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Box(
@@ -341,7 +336,7 @@ private fun SettlementCard(
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.SemiBold,
                         ),
-                        color = OnSurface,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
@@ -364,22 +359,11 @@ private fun SettlementCard(
                         content = item.upiUri,
                         sizeDp = 250.dp,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SelectionContainer {
-                        Text(
-                            text = item.upiUri,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 10.sp,
-                            ),
-                            color = OnSurfaceVariant,
-                        )
-                    }
                 } else {
                     Text(
                         text = "Set up your UPI ID in profile to generate QR codes",
                         style = MaterialTheme.typography.bodySmall,
-                        color = OnSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -391,7 +375,7 @@ private fun SettlementCard(
             Text(
                 text = "Tap to mark settled",
                 style = MaterialTheme.typography.labelSmall,
-                color = OnSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .clickable { onMarkPaid() },

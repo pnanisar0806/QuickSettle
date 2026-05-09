@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -912,21 +913,24 @@ private fun SharesField(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
             ),
+            cursorBrush = SolidColor(Color.Transparent),
             decorationBox = { innerTextField ->
-                if (textValue.isEmpty()) {
-                    Text(
-                        text = "0",
-                        style = TextStyle(
-                            fontFamily = ManropeBold,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                    if (textValue.isEmpty()) {
+                        Text(
+                            text = "0",
+                            style = TextStyle(
+                                fontFamily = ManropeBold,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    innerTextField()
                 }
-                innerTextField()
             },
         )
         Spacer(modifier = Modifier.width(4.dp))
